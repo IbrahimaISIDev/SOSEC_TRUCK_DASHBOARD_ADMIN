@@ -467,12 +467,12 @@ This project is licensed under the MIT License. See the `LICENSE` file.
 
 ## Contact
 
-**Maintainer:** \[Ibrahima Sory Diallo]
+**Maintainer:** Ibrahima Sory Diallo
 
 **Email:** [ibrahima.diallo@saraya.tech](mailto:ibrahima.diallo@saraya.tech)
 
-**GitHub:** [github.com/your-username/saraya-tech-portal](https://github.com/your-username/saraya-tech-portal)o
+**GitHub:** [github.com/IbrahimaISIDev/SOSEC_TRUCK_DASHBOARD_ADMIN.git](https://github.com/IbrahimaISIDev/SOSEC_TRUCK_DASHBOARD_ADMIN.git)
 
-**Issues:** [GitHub Issues](https://github.com/your-username/saraya-tech-portal/issues)
+**Issues:** [GitHub Issues](https://github.com/IbrahimaISIDev/SOSEC_TRUCK_DASHBOARD_ADMIN.git/issues)
 
 *Last updated: May 20, 2025*
