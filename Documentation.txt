@@ -1,0 +1,47 @@
+🔧 1. Documentation Technique du Backend
+Contenu prévu :
+
+Stack utilisée (Node.js, TypeScript, Express, Sequelize…)
+
+Structure détaillée des dossiers/fichiers
+
+Design de la base de données (schéma PostgreSQL)
+
+Logique des services métier (calculs, synchronisation, etc.)
+
+Sécurité (JWT, bcrypt, CSRF, etc.)
+
+Cron jobs (vérifications d’expiration)
+
+📡 2. Documentation de l’API REST
+Contenu prévu :
+
+Liste complète des endpoints (groupés par domaine : auth, finances, documents, etc.)
+
+Spécifications pour chaque route :
+
+Méthode HTTP
+
+URL
+
+Paramètres attendus
+
+Réponse attendue
+
+Erreurs possibles
+
+Exemples d’utilisation (ex : via REST Client ou Postman)
+
+🔗 3. Intégration Firebase / SOSEC Mobile App
+Contenu prévu :
+
+Architecture de synchronisation (Firestore → API → PostgreSQL)
+
+Format des données synchronisées (tickets, reçus, dépenses…)
+
+Gestion des notifications FCM
+
+Sécurité via Firebase Rules
+
+Comportement côté mobile (upload, lecture, accès limité)
+

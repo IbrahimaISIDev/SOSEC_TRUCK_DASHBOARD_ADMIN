@@ -1,0 +1,297 @@
+backend/
+├── src/
+│   ├── config/                     # Configuration des connexions (DB, Firebase)
+│   │   ├── db.ts                   # Configuration Sequelize pour PostgreSQL
+│   │   └── firebase.ts             # Configuration Firebase Admin SDK
+│   ├── controllers/                # Logique des routes (gestion des requêtes)
+│   │   ├── authController.ts       # Gestion de l'authentification (US17, US18)
+│   │   ├── financialController.ts  # Gestion des revenus/dépenses (US1, US2, US3, US4)
+│   │   ├── documentController.ts   # Gestion des documents (US5, US6, US7, US8)
+│   │   ├── notificationController.ts # Gestion des notifications (US9, US10, US11, US12)
+│   │   ├── reportController.ts     # Gestion des rapports (US13, US14, US15)
+│   │   ├── userController.ts       # Gestion des utilisateurs (US16)
+│   │   └── syncController.ts       # Synchronisation avec l'application mobile
+│   ├── models/                     # Modèles Sequelize (entités de la DB)
+│   │   ├── utilisateur.ts          # Modèle Utilisateur
+│   │   ├── revenu.ts               # Modèle Revenu
+│   │   ├── depense.ts              # Modèle Depense
+│   │   ├── document.ts             # Modèle Document
+│   │   ├── notification.ts         # Modèle Notification
+│   │   ├── client.ts               # Modèle Client
+│   │   └── notificationConfig.ts   # Modèle pour la période de notification
+│   ├── routes/                     # Définition des routes API
+│   │   ├── authRoutes.ts           # Routes pour l'authentification
+│   │   ├── financialRoutes.ts      # Routes pour les finances
+│   │   ├── documentRoutes.ts       # Routes pour les documents
+│   │   ├── notificationRoutes.ts   # Routes pour les notifications
+│   │   ├── reportRoutes.ts         # Routes pour les rapports
+│   │   ├── userRoutes.ts           # Routes pour les utilisateurs
+│   │   └── syncRoutes.ts           # Routes pour la synchronisation
+│   ├── services/                   # Logique métier (calculs, synchronisation)
+│   │   ├── financialService.ts     # Calculs financiers (TR2)
+│   │   ├── documentService.ts      # Gestion des documents
+│   │   ├── notificationService.ts  # Génération des notifications
+│   │   └── syncService.ts          # Synchronisation avec Firebase
+│   ├── middleware/                 # Middleware pour sécurité et validation
+│   │   ├── authMiddleware.ts       # Vérification JWT
+│   │   ├── csrfMiddleware.ts       # Protection CSRF (DS3)
+│   │   └── rateLimitMiddleware.ts  # Limitation des requêtes
+│   ├── cron/                       # Tâches planifiées
+│   │   └── expirationCron.ts       # Vérification quotidienne des expirations (TR3)
+│   ├── utils/                      # Utilitaires (chiffrement, logging)
+│   │   ├── encryption.ts           # Chiffrement AES-256 (DS1)
+│   │   ├── logger.ts               # Logging avec Winston
+│   │   └── errorHandler.ts         # Gestion des erreurs
+│   ├── __tests__/                  # Tests unitaires et d'intégration
+│   │   ├── financial.test.ts       # Tests pour les calculs financiers
+│   │   ├── sync.test.ts            # Tests pour la synchronisation
+│   │   └── auth.test.ts            # Tests pour l'authentification
+│   └── index.ts                    # Point d'entrée de l'application
+├── .env                            # Variables d'environnement
+├── .eslintrc.js                    # Configuration ESLint
+├── .prettierrc                     # Configuration Prettier
+├── jest.config.js                  # Configuration Jest
+├── tsconfig.json                   # Configuration TypeScript
+└── package.json                    # Dépendances et scripts
+
+Responsabilités
+config/ : Configure les connexions à PostgreSQL et Firebase.
+controllers/ : Gère les requêtes HTTP, appelle les services, et renvoie les réponses.
+models/ : Définit les schémas de la base de données et les relations.
+routes/ : Mappe les endpoints API aux contrôleurs.
+services/ : Contient la logique métier (ex. calculs financiers, synchronisation des tickets).
+middleware/ : Sécurise les routes (JWT, CSRF, rate limiting).
+cron/ : Exécute des tâches planifiées (vérification des expirations).
+utils/ : Fournit des fonctions réutilisables (chiffrement, logging).
+tests/ : Contient les tests unitaires et d’intégration.
+
+
+@startuml
+actor Administrateur
+actor Chauffeur
+
+Administrateur --> (Enregistrer revenus)
+Administrateur --> (Enregistrer dépenses)
+Administrateur --> (Générer états financiers)
+Administrateur --> (Afficher résumés financiers)
+Administrateur --> (Ajouter documents)
+Administrateur --> (Associer documents)
+Administrateur --> (Trier documents)
+Administrateur --> (Télécharger documents)
+Administrateur --> (Configurer notifications)
+Administrateur --> (Exporter rapports)
+Administrateur --> (Voir historique client)
+Administrateur --> (Voir ventilation dépenses)
+Administrateur --> (Créer comptes utilisateurs)
+Administrateur --> (Recevoir notifications)
+Administrateur --> (Marquer notifications lues)
+
+Chauffeur --> (Afficher résumés financiers) : Si autorisé
+Chauffeur --> (Trier documents) : Documents associés
+Chauffeur --> (Visualiser documents) : Lecture seule
+Chauffeur --> (Recevoir notifications) : Documents associés
+Chauffeur --> (Marquer notifications lues)
+
+Chauffeur --> (Saisir dépenses) : Via application mobile
+Chauffeur --> (Scanner tickets) : Via application mobile
+(Saisir dépenses) --> (Enregistrer dépenses) : Synchronisation
+(Scanner tickets) --> (Ajouter documents) : Synchronisation
+
+Administrateur --> (Se connecter)
+Chauffeur --> (Se connecter)
+Administrateur --> (Réinitialiser mot de passe)
+Chauffeur --> (Réinitialiser mot de passe)
+
+@enduml
+
+
+@startuml
+class Utilisateur {
+  -id: String
+  -nom: String
+  -email: String
+  -motDePasse: String (haché)
+  -role: Enum (Administrateur, Chauffeur)
+  +seConnecter()
+  +reinitialiserMotDePasse()
+}
+
+class Administrateur {
+  +enregistrerRevenus()
+  +enregistrerDepenses()
+  +genererRapports()
+  +ajouterDocuments()
+  +associerDocuments()
+  +configurerNotifications()
+  +creerUtilisateur()
+}
+
+class Chauffeur {
+  -permis: String
+  -telephone: String
+  -camionId: String
+  +consulterDocuments()
+  +consulterResumesFinanciers()
+  +recevoirNotifications()
+}
+
+class Revenu {
+  -id: String
+  -montant: Float
+  -source: String
+  -date: Timestamp
+  -notes: String
+}
+
+class Depense {
+  -id: String
+  -montant: Float
+  -categorie: String
+  -date: Timestamp
+  -notes: String
+}
+
+class Document {
+  -id: String
+  -nom: String
+  -type: String
+  -dateExpiration: Timestamp
+  -clientId: String
+  -chauffeurId: String
+  -fichierUrl: String
+  +trierParExpiration()
+  +telecharger()
+}
+
+class Notification {
+  -id: String
+  -documentId: String
+  -joursRestants: Integer
+  -lue: Boolean
+  +marquerCommeLue()
+}
+
+class Rapport {
+  -id: String
+  -type: Enum (Mensuel, Periode)
+  -revenus: Float
+  -depenses: Float
+  -net: Float
+  -dateDebut: Timestamp
+  -dateFin: Timestamp
+  +exporter()
+}
+
+class Client {
+  -id: String
+  -nom: String
+  -historiqueDepenses: List<Depense>
+  -historiqueRevenus: List<Revenu>
+}
+
+Utilisateur <|-- Administrateur
+Utilisateur <|-- Chauffeur
+Administrateur --> Revenu : enregistre
+Administrateur --> Depense : enregistre
+Administrateur --> Document : gère
+Administrateur --> Notification : configure
+Administrateur --> Rapport : génère
+Chauffeur --> Document : consulte
+Chauffeur --> Notification : reçoit
+Client --> Document : associé
+Client --> Depense : associé
+Client --> Revenu : associé
+Document --> Notification : déclenche
+
+class Ticket {
+  -id: String
+  -ticketNum: String
+  -dateEntree: Timestamp
+  -dateSortie: Timestamp
+  -camionId: String
+  -poidsNet: Float
+  -imageUrl: String
+}
+
+class BonCarburant {
+  -id: String
+  -date: Timestamp
+  -chauffeurId: String
+  -montant: Float
+  -quantite: Integer
+  -imageUrl: String
+}
+
+Ticket --> Document : synchronisé
+BonCarburant --> Depense : synchronisé
+Chauffeur --> Ticket : scanne
+Chauffeur --> BonCarburant : scanne
+
+@enduml
+
+
+const bcrypt = require('bcryptjs');
+async function hashPassword(password) {
+  return await bcrypt.hash(password, 12); // 12 rounds
+}
+async function verifyPassword(password, hash) {
+  return await bcrypt.compare(password, hash);
+}
+
+
+const csurf = require('csurf');
+app.use(csurf());
+app.post('/revenus', (req, res) => {
+  // CSRF token validated automatically
+  // Process revenue creation
+});
+
+
+<input type="hidden" name="_csrf" value={csrfToken} />
+
+const jwt = require('jsonwebtoken');
+function generateToken(user) {
+  return jwt.sign({ id: user.id, role: user.role }, 'secret-key', { expiresIn: '1h' });
+}
+
+
+function authenticate(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send('Unauthorized');
+  jwt.verify(token, 'secret-key', (err, decoded) => {
+    if (err) return res.status(401).send('Invalid token');
+    req.user = decoded;
+    next();
+  });
+}
+
+
+{
+  "rules": {
+    ".read": "auth != null && $uid === root.child('users').child(auth.uid).child('role').val() === 'driver'",
+    ".write": "auth != null && $uid === root.child('users').child(auth.uid).child('role').val() === 'driver'",
+    "expenses": {
+      "$date": {
+        "$expenseId": {
+          ".validate": "newData.hasChildren(['id', 'driverId', 'type', 'entryType', 'date', 'amount', 'syncStatus', 'time'])",
+          "driverId": {
+            ".validate": "newData.val() === root.child('users').child(auth.uid).child('id').val()"
+          },
+          "syncStatus": {
+            ".validate": "newData.val() === 'synced' || newData.val() === 'pending'"
+          }
+        }
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
+
+Remplace $uid par une variable correspondant à ton système d'authentification.
+Assure-toi que les champs comme driverId sont validés contre les données de l'utilisateur authentifié.
+Teste ces règles dans la console Firebase avec la simulation pour vérifier qu'elles fonctionnent comme prévu.

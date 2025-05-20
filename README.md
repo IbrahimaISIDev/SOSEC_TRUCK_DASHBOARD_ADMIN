@@ -1,8 +1,8 @@
-# Saraya Tech Portal
+# SOSEC_TRUCK_DASHBOARD_ADMIN
 
 ## Table of Contents
 
-- [Saraya Tech Portal](#saraya-tech-portal)
+- [SOSEC\_TRUCK\_DASHBOARD\_ADMIN](#sosec_truck_dashboard_admin)
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
     - [Objectives](#objectives)
@@ -46,7 +46,7 @@
 
 ## Project Overview
 
-The **Saraya Tech Portal** is a web-based application developed for Saraya Tech Solutions to streamline financial tracking, document management, user administration, and real-time notifications. It complements the **SOSEC mobile app** used by drivers to scan tickets, log expenses, and track truck maintenance. Administrators can manage all backend operations, while drivers have restricted, read-only access to view their relevant information.
+The **SOSEC_TRUCK_DASHBOARD_ADMIN** is a web-based application developed for Saraya Tech Solutions to streamline financial tracking, document management, user administration, and real-time notifications. It complements the **SOSEC mobile app** used by drivers to scan tickets, log expenses, and track truck maintenance. Administrators can manage all backend operations, while drivers have restricted, read-only access to view their relevant information.
 
 ### Objectives
 
@@ -468,9 +468,11 @@ This project is licensed under the MIT License. See the `LICENSE` file.
 ## Contact
 
 **Maintainer:** \[Ibrahima Sory Diallo]
+
 **Email:** [ibrahima.diallo@saraya.tech](mailto:ibrahima.diallo@saraya.tech)
-**GitHub:** [github.com/your-username/saraya-tech-portal](https://github.com/your-username/saraya-tech-portal)
+
+**GitHub:** [github.com/your-username/saraya-tech-portal](https://github.com/your-username/saraya-tech-portal)o
+
 **Issues:** [GitHub Issues](https://github.com/your-username/saraya-tech-portal/issues)
 
 *Last updated: May 20, 2025*
-# SOSEC_TRUCK_DASHBOARD_ADMIN

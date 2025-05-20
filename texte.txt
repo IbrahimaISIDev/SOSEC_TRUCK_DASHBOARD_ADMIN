@@ -1,0 +1,65 @@
+dev@Ibrahima:~$ psql -U postgres
+CREATE DATABASE saraya_portal;
+CREATE USER saraya_user WITH PASSWORD 'saraya123@';
+GRANT ALL PRIVILEGES ON DATABASE saraya_portal TO saraya_user;
+\q
+
+
+psql -U saraya_user -d saraya_portal
+INSERT INTO utilisateurs (id, nom, email, mot_de_passe, role) VALUES (gen_random_uuid(), 'Admin Test', 'admin@test.com', '$2a$12$YOUR_HASHED_PASSWORD', 'Administrateur');
+
+node
+const bcrypt = require('bcryptjs');
+bcrypt.hashSync('password', 12);
+
+frontend/
+├── public/                         # Fichiers statiques
+│   ├── favicon.ico                # Icône du site
+│   ├── index.html                 # Point d'entrée HTML
+│   ├── manifest.json              # Configuration PWA
+│   └── logo.png                   # Logo de l'application
+├── src/
+│   ├── api/                       # Gestion des appels API
+│   │   ├── authApi.ts             # Requêtes pour l'authentification (US17)
+│   │   ├── financialApi.ts        # Requêtes pour les finances (US1, US2, US3, US4)
+│   │   ├── documentApi.ts         # Requêtes pour les documents (US5, US6, US7, US8)
+│   │   ├── notificationApi.ts     # Requêtes pour les notifications (US9, US10, US11, US12)
+│   │   ├── reportApi.ts           # Requêtes pour les rapports (US13, US14, US15)
+│   │   ├── userApi.ts             # Requêtes pour les utilisateurs (US16)
+│   │   └── syncApi.ts             # Requêtes pour la synchronisation
+│   ├── components/                # Composants réutilisables
+│   │   ├── FinancialForm.tsx      # Formulaire pour revenus/dépenses (US1, US2)
+│   │   ├── DocumentList.tsx       # Liste des documents avec tri (US7)
+│   │   ├── NotificationList.tsx   # Liste des notifications (US9, US11)
+│   │   ├── ReportGenerator.tsx    # Générateur de rapports (US13)
+│   │   ├── DateRangePicker.tsx    # Sélecteur de dates pour rapports (US3, US4)
+│   │   └── UserForm.tsx           # Formulaire pour gérer les utilisateurs (US16)
+│   ├── pages/                     # Pages principales
+│   │   ├── Login.tsx              # Page de connexion (US17)
+│   │   ├── Dashboard.tsx          # Tableau de bord (US4, US9)
+│   │   ├── Financials.tsx         # Gestion des finances (US1, US2, US3)
+│   │   ├── Documents.tsx          # Gestion des documents (US5, US6, US7, US8)
+│   │   ├── Notifications.tsx      # Gestion des notifications (US10, US11, US12)
+│   │   ├── Reports.tsx            # Gestion des rapports (US13, US14, US15)
+│   │   └── Users.tsx              # Gestion des utilisateurs (US16)
+│   ├── context/                   # Gestion de l'état global
+│   │   └── AuthContext.tsx        # Contexte pour l'authentification
+│   ├── hooks/                     # Hooks personnalisés
+│   │   └── useApi.tsx             # Hook pour gérer les appels API
+│   ├── styles/                    # Styles et thèmes
+│   │   └── theme.ts               # Thème Material-UI
+│   ├── assets/                    # Images, icônes
+│   │   └── logo.svg               # Logo vectoriel
+│   ├── __tests__/                 # Tests unitaires
+│   │   ├── FinancialForm.test.tsx # Tests pour le formulaire financier
+│   │   ├── DocumentList.test.tsx  # Tests pour la liste des documents
+│   │   └── Login.test.tsx         # Tests pour la page de connexion
+│   ├── App.tsx                    # Composant principal avec routage
+│   ├── index.tsx                  # Point d'entrée React
+│   ├── index.css                  # Styles globaux
+│   └── types.ts                   # Définitions de types TypeScript
+├── .env                           # Variables d'environnement
+├── .eslintrc.js                   # Configuration ESLint
+├── .prettierrc                    # Configuration Prettier
+├── tsconfig.json                  # Configuration TypeScript
+└── package.json                   # Dépendances et scripts
