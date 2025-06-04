@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const userController_1 = require("../controllers/userController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.get('/users/:userId', auth_1.authenticateToken, userController_1.getUserHandler);
+router.get('/users', auth_1.authenticateToken, userController_1.getAllUsersHandler);
+router.post('/users', auth_1.authenticateToken, userController_1.createUserHandler);
+router.put('/users/:userId', auth_1.authenticateToken, userController_1.createUserHandler);
+router.delete('/users/:userId', auth_1.authenticateToken, userController_1.deleteUserHandler);
+exports.default = router;
+// import { Router } from 'express';
+// import { getUserHandler, getAllUsersHandler, createUserHandler, updateUserHandler, deleteUserHandler } from '../controllers/userController';
+// import { authenticateToken } from '../middleware/auth';
+// const router = Router();
+// router.get('/users/:userId', authenticateToken, getUserHandler);
+// router.get('/users', authenticateToken, getAllUsersHandler);
+// router.post('/users', authenticateToken, createUserHandler);
+// router.put('/users/:userId', authenticateToken, updateUserHandler);
+// router.delete('/users/:userId', authenticateToken, deleteUserHandler);
+// export default router;
+//# sourceMappingURL=userRoutes.js.map

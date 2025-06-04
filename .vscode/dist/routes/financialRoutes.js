@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const financialController_1 = require("../controllers/financialController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.post('/revenus', auth_1.authenticateToken, financialController_1.createRevenuHandler);
+router.post('/depenses', auth_1.authenticateToken, financialController_1.createDepenseHandler);
+router.get('/depenses/:date', auth_1.authenticateToken, financialController_1.getDepensesByDateHandler);
+router.get('/depenses', auth_1.authenticateToken, financialController_1.getAllDepensesHandler);
+router.get('/tickets/:date', auth_1.authenticateToken, financialController_1.getTicketsByDateHandler);
+router.get('/mileages/:date', auth_1.authenticateToken, financialController_1.getMileagesByDateHandler);
+exports.default = router;
+//# sourceMappingURL=financialRoutes.js.map

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const dataController_1 = require("../controllers/dataController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.get('/data', auth_1.authenticateToken, dataController_1.getAllDataHandler);
+router.get('/firebase/tickets', auth_1.authenticateToken, dataController_1.getTicketsFromFirebase);
+router.get('/firebase/expenses', auth_1.authenticateToken, dataController_1.getExpensesFromFirebase);
+router.get('/firebase/mileages', auth_1.authenticateToken, dataController_1.getMileagesFromFirebase);
+router.get('/firebase/users', auth_1.authenticateToken, dataController_1.getUsersFromFirebase);
+exports.default = router;
+//# sourceMappingURL=dataRoutes.js.map

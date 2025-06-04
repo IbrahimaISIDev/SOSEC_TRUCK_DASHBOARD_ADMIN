@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352358788537",
+    "project_id": "sosec-app",
+    "storage_bucket": "sosec-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352358788537:android:ddc0487fa77ad110a69a68",
+        "android_client_info": {
+          "package_name": "com.example.sosec_truck_app_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk2EuoFTH-xB6L0glIG9u1eFJoT7YQZQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
