@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Op } from 'sequelize';
-import { db } from '../config/firebase';
+const { db } = require('../config/firebase');
 import Document from '../models/document';
 import Depense from '../models/depense';
 import Mileage from '../models/mileage';

@@ -1,4 +1,4 @@
-import { db } from '../config/firebase';
+const { db } = require('../config/firebase');
 import logger from '../utils/logger';
 import CamionModel from '../models/camion';
 import Utilisateur from '../models/utilisateur';

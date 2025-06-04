@@ -1,4 +1,3 @@
-// SideBar.tsx
 import { useState } from 'react';
 import {
   Drawer,
@@ -8,7 +7,6 @@ import {
   ListItemText,
   IconButton,
   Box,
-  Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -25,7 +23,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { NAVBAR_HEIGHT } from './NavBar'; // Import de la constante de hauteur
+import { NAVBAR_HEIGHT } from './NavBar';
 
 export const SIDEBAR_WIDTH = 240;
 export const SIDEBAR_COLLAPSED_WIDTH = 60;
@@ -35,17 +33,18 @@ export default function SideBar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Cohérence avec NavBar
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const menuItems = [
     { label: 'Tableau de bord', path: '/dashboard', icon: <DashboardIcon /> },
     { label: 'Documents', path: '/documents', icon: <DescriptionIcon /> },
-    { label: 'Finances', path: '/financials', icon: <AttachMoneyIcon /> },
+    { label: 'Dépenses', path: '/expenses', icon: <AttachMoneyIcon /> },
     { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
     { label: 'Chauffeurs', path: '/drivers', icon: <PersonIcon/> },
-    { label: 'Camions', path: '/trucks', icon: <TruckIcon /> }, // Corrigé le chemin
-    { label: 'Tickets', path: '/tickets', icon: <AssessmentIcon /> }, // Corrigé le chemin
+    { label: 'Camions', path: '/trucks', icon: <TruckIcon /> },
+    { label: 'Tickets', path: '/tickets', icon: <AssessmentIcon /> },
     { label: 'Rapports', path: '/reports', icon: <AssessmentIcon /> },
+    { label: 'Kilométrage', path: '/mileages', icon: <AssessmentIcon /> },
   ];
 
   const handleToggle = () => {
@@ -90,19 +89,13 @@ export default function SideBar() {
             overflowX: 'hidden',
             borderRight: 'none',
             boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
-            // Ajustements pour être sous la NavBar et correctement aligné
             marginTop: `${NAVBAR_HEIGHT}px`,
             height: `calc(100% - ${NAVBAR_HEIGHT}px)`,
             position: 'fixed',
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: open ? 'space-between' : 'center' }}>
-          {open && (
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Saraya Tech
-            </Typography>
-          )}
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: open ? 'flex-end' : 'center' }}>
           <IconButton onClick={handleToggle} sx={{ color: 'white' }}>
             <MenuIcon />
           </IconButton>
@@ -124,7 +117,6 @@ export default function SideBar() {
           ))}
         </List>
       </Drawer>
-      {/* Ajout d'un espace pour éviter que le contenu ne soit masqué par la sidebar en version desktop */}
       {!isMobile && (
         <Box sx={{ width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH }} />
       )}

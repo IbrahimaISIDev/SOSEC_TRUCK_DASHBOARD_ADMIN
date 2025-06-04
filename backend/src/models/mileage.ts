@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+const sequelize = require('../config/db');
 
 const MileageModel = sequelize.define('Mileage', {
   id: {

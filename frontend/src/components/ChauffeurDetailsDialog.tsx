@@ -31,7 +31,7 @@ export default function ChauffeurDetailsDialog({
   open,
   chauffeur,
   camions,
-  onClose,
+  onClose,  
   onEdit,
 }: any) {
   if (!chauffeur) return null;

@@ -1,26 +1,27 @@
-import { DataTypes, Model, ForeignKey } from 'sequelize';
-import sequelize from '../config/db';
-import Utilisateur from './utilisateur'; // Import Utilisateur pour l'association
+// src/models/camion.ts
+import { DataTypes, Model } from 'sequelize';
+const sequelize = require('../config/db');
 
 class Camion extends Model {
   public id!: string;
+  public immatriculation!: string | null;
   public nom!: string;
   public type!: string;
-  public immatriculation?: string;
-  public syncStatus?: string;
-  public time?: string;
-  public assuranceDetails?: object;
-  public assuranceExpiration?: Date;
-  public driverId?: ForeignKey<Utilisateur['id']>; // Clé étrangère vers Utilisateur
+  public assuranceDetails!: object | null;
+  public assuranceExpiration!: Date | null;
+  public driverId!: string | null;
+  public syncStatus!: string;
+  public time!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
 
-  public static associate(models: any) {
-    // Définir l'association 1:1 avec Utilisateur
+  public static associate(models: {
+    Utilisateur: typeof import('./utilisateur').default;
+  }) {
     Camion.belongsTo(models.Utilisateur, {
       foreignKey: 'driverId',
-      as: 'driver',
-      onDelete: 'SET NULL', // Si le chauffeur est supprimé, le lien est annulé
+      as: 'chauffeur',
+      onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
     });
   }
@@ -33,37 +34,17 @@ Camion.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    immatriculation: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     nom: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Le nom ne peut pas être une chaîne vide',
-        },
-      },
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Le type ne peut pas être une chaîne vide',
-        },
-      },
-    },
-    immatriculation: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    syncStatus: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'synced',
-    },
-    time: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: () => new Date().toISOString(),
     },
     assuranceDetails: {
       type: DataTypes.JSON,
@@ -74,7 +55,7 @@ Camion.init(
       allowNull: true,
     },
     driverId: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING(255),
       allowNull: true,
       references: {
         model: 'utilisateurs',
@@ -82,6 +63,26 @@ Camion.init(
       },
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
+      unique: 'unique_driverId', // Enforce 1:1 relationship
+    },
+    syncStatus: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: 'synced',
+    },
+    time: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {

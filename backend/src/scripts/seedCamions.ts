@@ -1,4 +1,4 @@
-import sequelize from '../config/db';
+const sequelize = require('../config/db');
 import Camion from '../models/camion';
 
 const seedCamions = async () => {

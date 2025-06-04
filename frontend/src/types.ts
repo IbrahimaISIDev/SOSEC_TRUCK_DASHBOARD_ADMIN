@@ -1,6 +1,4 @@
-// types.ts - Fichier pour centraliser vos définitions de types
-
-// Interface Camion commune
+// Interface Camion
 export interface Camion {
   id: string;
   nom: string;
@@ -15,7 +13,7 @@ export interface Camion {
   updatedAt: string;
 }
 
-// Interface Chauffeur commune
+// Interface Chauffeur
 export interface Chauffeur {
   id: string;
   nom: string;
@@ -31,8 +29,59 @@ export interface Chauffeur {
   camion?: Camion;
 }
 
-// Autres types utilisés dans votre application
+// Interface Mileage
+export interface Mileage {
+  id: string;
+  camionId: string;
+  driverId: string;
+  date: string;
+  distance: number;
+  imageUrl?: string;
+  syncStatus: string;
+  extraData: { [key: string]: any };
+  time?: string;
+}
+
+// Interface Ticket
+export interface Ticket {
+  id: string;
+  type: 'weight' | 'fuel';
+  ticketNum?: string;
+  dateEntrance?: string;
+  dateExit?: string;
+  camionId?: string;
+  truckId?: string;
+  product?: string;
+  netWeight?: number | string;
+  driver: string;
+  driverId?: string;
+  imageUrl?: string;
+  syncStatus: string;
+  extraData?: string | { [key: string]: any };
+  time?: string;
+}
+// Interface Expense
+export interface Expense {
+  id: string;
+  driverId: string | null;
+  driverName?: string; // Ajouté pour stocker le nom du chauffeur
+  type: 'carburant' | 'huile' | 'reparations' | 'autres';
+  entryType: 'manual' | 'scan';
+  date: string;
+  quantity?: number;
+  amount: number;
+  description?: string;
+  location?: string;
+  paymentMethod?: 'cash' | 'card' | 'mobileMoney';
+  imageUrl?: string;
+  syncStatus: string;
+  time?: string;
+}
+
+// Interface DecodedToken
 export interface DecodedToken {
   id: string;
-  role: string;
+  role: 'admin' | 'driver';
 }
+
+//Je veux également faire en sorte que lorsque je récupère les dépenses, le nom du chauffeur soit directement ajouté à l'objet Expense, sans avoir à faire une requête supplémentaire pour chaque dépense. Voici comment je vais procéder :

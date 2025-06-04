@@ -1,9 +1,10 @@
 import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
+const sequelize = require('../config/db');
 
 class Client extends Model {
   public id!: string;
   public nom!: string;
+  static associate: any;
 }
 
 Client.init(

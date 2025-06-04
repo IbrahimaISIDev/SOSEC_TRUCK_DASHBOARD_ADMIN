@@ -7,36 +7,23 @@ import {
   createChauffeur,
   updateChauffeur,
   deleteChauffeur,
-  getAllCamions,
 } from '../api/userApi';
-
-// Types
-interface Camion {
-  id: string;
-  immatriculation: string;
-}
-
-interface Chauffeur {
-  id: string;
-  nom: string;
-  email: string;
-  role: 'admin' | 'driver';
-  password?: string; // Ajout de password, optionnel pour gérer création/mise à jour
-  permisNumero?: string;
-  permisDelivrance?: Date | null;
-  permisExpiration?: Date | null;
-  permisLieu?: string;
-  permisCategorie?: string;
-  camionId?: string;
-  camion?: Camion;
-}
+import { getAllCamions } from '../api/camionApi';
+import type { Chauffeur, Camion } from '../types';
 
 // Error Boundary
-class ErrorBoundary extends Component<{ children: ReactNode }> {
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
   state = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo);
   }
 
   render() {
@@ -62,18 +49,35 @@ export default function Chauffeurs() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [chauffeursData, camionsData] = await Promise.all([
+        const [chauffeursData, camionsResponse] = await Promise.all([
           getAllChauffeurs(),
           getAllCamions(),
         ]);
-        setChauffeurs(chauffeursData);
-        setCamions(camionsData);
+
+        // Validate chauffeursData
+        if (!Array.isArray(chauffeursData)) {
+          console.error('getAllChauffeurs did not return an array:', chauffeursData);
+          setChauffeurs([]);
+        } else {
+          setChauffeurs(chauffeursData);
+        }
+
+        // Validate camionsResponse
+        if (!Array.isArray(camionsResponse.camions)) {
+          console.error('getAllCamions did not return an array of camions:', camionsResponse);
+          setCamions([]);
+        } else {
+          setCamions(camionsResponse.camions);
+        }
       } catch (error) {
+        console.error('Error fetching data:', error);
         setAlertInfo({
           count: 0,
           message: 'Erreur lors du chargement des données.',
           severity: 'error',
         });
+        setChauffeurs([]);
+        setCamions([]);
       } finally {
         setLoading(false);
       }
@@ -89,7 +93,6 @@ export default function Chauffeurs() {
     const validChauffeurs = chauffeurs.filter(
       (chauffeur) => chauffeur.id && chauffeur.nom && chauffeur.email
     );
-    console.log('Valid chauffeurs:', validChauffeurs);
 
     const today = new Date();
     let expiredCount = 0;
@@ -130,7 +133,6 @@ export default function Chauffeurs() {
   // Ajouter un chauffeur
   const handleAddChauffeur = async (newChauffeur: Omit<Chauffeur, 'id'>) => {
     try {
-      // Vérification du mot de passe obligatoire à la création
       if (!newChauffeur.password) {
         setAlertInfo({
           count: 0,
@@ -139,7 +141,9 @@ export default function Chauffeurs() {
         });
         return;
       }
-      const createdChauffeur = await createChauffeur(newChauffeur);
+      // On retire le champ id s'il existe par erreur
+      const { id, ...chauffeurSansId } = newChauffeur as any;
+      const createdChauffeur = await createChauffeur(chauffeurSansId);
       setChauffeurs([...chauffeurs, createdChauffeur]);
       setAlertInfo({
         count: 1,
@@ -147,6 +151,7 @@ export default function Chauffeurs() {
         severity: 'success',
       });
     } catch (error) {
+      console.error('Error adding chauffeur:', error);
       setAlertInfo({
         count: 0,
         message: "Erreur lors de l'ajout du chauffeur.",
@@ -158,7 +163,9 @@ export default function Chauffeurs() {
   // Mettre à jour un chauffeur
   const handleUpdateChauffeur = async (id: string, updatedData: Partial<Chauffeur>) => {
     try {
-      const updatedChauffeur = await updateChauffeur(id, updatedData);
+      // On retire le champ id du body si présent
+      const { id: _id, ...dataSansId } = updatedData;
+      const updatedChauffeur = await updateChauffeur(id, dataSansId);
       setChauffeurs(
         chauffeurs.map((chauffeur) =>
           chauffeur.id === id ? { ...chauffeur, ...updatedChauffeur } : chauffeur
@@ -170,6 +177,7 @@ export default function Chauffeurs() {
         severity: 'success',
       });
     } catch (error) {
+      console.error('Error updating chauffeur:', error);
       setAlertInfo({
         count: 0,
         message: 'Erreur lors de la mise à jour du chauffeur.',
@@ -189,6 +197,7 @@ export default function Chauffeurs() {
         severity: 'success',
       });
     } catch (error) {
+      console.error('Error deleting chauffeur:', error);
       setAlertInfo({
         count: 0,
         message: 'Erreur lors de la suppression du chauffeur.',

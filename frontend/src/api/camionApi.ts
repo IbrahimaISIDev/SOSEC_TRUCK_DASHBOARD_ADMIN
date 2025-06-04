@@ -1,18 +1,5 @@
 import axios from 'axios';
-
-export interface Camion {
-  id: string;
-  nom: string;
-  type: string;
-  immatriculation?: string;
-  assuranceDetails?: object;
-  assuranceExpiration?: string;
-  driverId?: string;
-  syncStatus?: string;
-  time?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Camion } from '../types';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -35,7 +22,7 @@ export const createCamion = async (camion: Partial<Camion>): Promise<Camion> => 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { error: errorMessage, details } = error.response.data;
-      throw new Error(details ? details.join(', ') : errorMessage || 'Erreur lors de la création du camion.');
+      throw new Error(details ? details.map((e: any) => e.message).join(', ') : errorMessage || 'Erreur lors de la création du camion.');
     }
     throw new Error('Erreur inconnue lors de la création du camion.');
   }
@@ -54,11 +41,12 @@ export const getCamion = async (id: string): Promise<Camion> => {
   }
 };
 
-export const getAllCamions = async (page: number = 1, pageSize: number = 10): Promise<{ camions: Camion[], total: number }> => {
+export const getAllCamions = async (page: number = 1, pageSize: number = 10): Promise<{ camions: Camion[]; total: number }> => {
   try {
     const response = await api.get('/api/camions', {
       params: { page, pageSize },
     });
+    console.log('getAllCamions response:', response.data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -76,7 +64,7 @@ export const updateCamion = async (id: string, camion: Partial<Camion>): Promise
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { error: errorMessage, details } = error.response.data;
-      throw new Error(details ? details.join(', ') : errorMessage || 'Erreur lors de la mise à jour du camion.');
+      throw new Error(details ? details.map((e: any) => e.message).join(', ') : errorMessage || 'Erreur lors de la mise à jour du camion.');
     }
     throw new Error('Erreur inconnue lors de la mise à jour du camion.');
   }

@@ -1,5 +1,5 @@
 import { DataTypes, Model, ForeignKey } from 'sequelize';
-import sequelize from '../config/db';
+const sequelize = require('../config/db');
 import Utilisateur from './utilisateur';
 
 class Depense extends Model {

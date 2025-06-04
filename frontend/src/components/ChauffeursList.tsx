@@ -13,13 +13,11 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid } from '@mui/x-data-grid';
-import type { GridRenderCellParams } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
+import type { GridRenderCellParams, GridColDef } from '@mui/x-data-grid';
 import { Visibility, Edit, Delete } from '@mui/icons-material';
 import ChauffeurForm from './ChauffeurForm';
 import ChauffeurDetailsDialog from './ChauffeurDetailsDialog';
-import type { Chauffeur } from '../types';
-import type { Camion } from '../types';
+import type { Chauffeur, Camion } from '../types';
 
 interface ChauffeursListProps {
   chauffeurs: Chauffeur[];
@@ -56,12 +54,21 @@ export default function ChauffeursList({
   const [openDetails, setOpenDetails] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
+  const [errorMessage, setErrorMessage] = useState<string>(''); // Ajout pour gérer les erreurs
 
   const handleOpenForm = (chauffeur?: Chauffeur) => {
+    setErrorMessage(''); // Réinitialise le message d'erreur à l'ouverture du form
     if (chauffeur) {
       setFormData({
         ...chauffeur,
-        password: '', // Ne pas pré-remplir le mot de passe en mode édition
+        // Pré-remplir les dates si elles existent, sinon null
+        permisDelivrance: chauffeur.permisDelivrance
+          ? new Date(chauffeur.permisDelivrance)
+          : null,
+        permisExpiration: chauffeur.permisExpiration
+          ? new Date(chauffeur.permisExpiration)
+          : null,
+        password: chauffeur.password || '', // Pré-remplir le mot de passe si présent
       });
       setIsEditing(true);
       setSelectedChauffeur(chauffeur);
@@ -87,6 +94,7 @@ export default function ChauffeursList({
   const handleCloseForm = () => {
     setOpenForm(false);
     setSelectedChauffeur(null);
+    setErrorMessage(''); // Réinitialise le message d'erreur à la fermeture du form
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,21 +112,22 @@ export default function ChauffeursList({
   const handleSubmit = (data: Partial<Chauffeur>) => {
     // Validation des champs requis
     if (!data.nom || !data.email || !data.role) {
-      alert('Les champs nom, email et rôle sont requis.');
+      setErrorMessage('Les champs nom, email et rôle sont requis.');
       return;
     }
     if (isEditing && selectedChauffeur) {
       onUpdate(selectedChauffeur.id, data);
+      handleCloseForm();
     } else {
       if (!data.password || data.password.length < 6) {
-        alert(
+        setErrorMessage(
           'Le mot de passe est requis et doit contenir au moins 6 caractères pour un nouvel utilisateur.'
         );
         return;
       }
       onAdd(data as Omit<Chauffeur, 'id'>);
+      handleCloseForm();
     }
-    handleCloseForm();
   };
 
   const handleOpenDetails = (chauffeur: Chauffeur) => {
@@ -213,7 +222,7 @@ export default function ChauffeursList({
       minWidth: 150,
       renderCell: (params: GridRenderCellParams) => {
         const camion = camions.find((c) => c.id === params.value);
-        return camion ? camion.immatriculation : '-';
+        return camion ? camion.immatriculation || camion.nom : '-';
       },
     },
     {
@@ -306,6 +315,12 @@ export default function ChauffeursList({
           }}
         />
       </Box>
+      {/* Affichage du message d'erreur si présent */}
+      {errorMessage && (
+        <Typography color="error" sx={{ mt: 2, mb: 1 }}>
+          {errorMessage}
+        </Typography>
+      )}
       <ChauffeurForm
         open={openForm}
         isEditing={isEditing}

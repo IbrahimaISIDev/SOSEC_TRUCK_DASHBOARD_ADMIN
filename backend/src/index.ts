@@ -1,12 +1,13 @@
+// src/index.ts
 import express from 'express';
 import cors from 'cors';
-import sequelize from './config/db';
 import authRoutes from './routes/authRoutes';
 import financialRoutes from './routes/financialRoutes';
 import userRoutes from './routes/userRoutes';
 import syncRoutes from './routes/syncRoutes';
 import camionRoutes from './routes/camionRoutes';
 import dataRoutes from './routes/dataRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import {
   syncUsers,
   syncCamions,
@@ -15,18 +16,28 @@ import {
   syncMileages,
   startRealtimeSync,
 } from './services/syncService';
+import './services/notificationService';
 import Utilisateur from './models/utilisateur';
 import Camion from './models/camion';
 import Depense from './models/depense';
 import Revenu from './models/revenu';
 import Document from './models/document';
-import Notification from './models/notification';
 import Client from './models/client';
 import logger from './utils/logger';
+import { Model, ModelStatic } from 'sequelize';
+
+// Define the type for the models object
+interface Models {
+  Utilisateur: typeof Utilisateur;
+  Camion: typeof Camion;
+  Depense: typeof Depense;
+  Revenu: typeof Revenu;
+  Document: typeof Document;
+  Client: typeof Client;
+}
 
 const app = express();
 
-// Middleware CORS placé tout en haut
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -37,7 +48,7 @@ app.use(
           'http://localhost:5173',
           'http://127.0.0.1:5173',
           'http://localhost:5174',
-          'http://127.0.0.1:5174'
+          'http://127.0.0.1:5174',
         ].includes(origin)
       ) {
         callback(null, true);
@@ -51,34 +62,32 @@ app.use(
 
 app.use(express.json());
 
-// Définir les associations avant la synchronisation
-const models = {
+// Initialize models
+const models: Models = {
   Utilisateur,
   Camion,
   Depense,
   Revenu,
   Document,
-  Notification,
   Client,
 };
-Utilisateur.associate(models);
-Camion.associate(models);
-Depense.associate(models);
-// Décommentez si besoin
-// Revenu.associate(models);
-// Document.associate(models);
-// Notification.associate(models);
-// Client.associate(models);
 
-// Mount all routes
+// Initialize associations
+Object.values(models).forEach((model) => {
+  // Type assertion to allow 'associate' property
+  if ((model as any).associate) {
+    (model as any).associate(models);
+  }
+});
+
 app.use('/auth', authRoutes);
 app.use('/api', financialRoutes);
 app.use('/api', userRoutes);
 app.use('/api', syncRoutes);
 app.use('/api', dataRoutes);
 app.use('/api', camionRoutes);
+app.use('/api', notificationRoutes);
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
@@ -87,7 +96,6 @@ const PORT = process.env.PORT || 3000;
 
 async function initialize() {
   try {
-    // Synchronisation manuelle des modèles dans l'ordre
     await Utilisateur.sync({ force: false });
     logger.info('Utilisateur synchronisé');
     await Camion.sync({ force: false });
@@ -95,12 +103,13 @@ async function initialize() {
     await Depense.sync({ force: false });
     logger.info('Depense synchronisé');
     await Revenu.sync({ force: false });
+    logger.info('Revenu synchronisé');
     await Document.sync({ force: false });
-    await Notification.sync({ force: false });
+    logger.info('Document synchronisé');
     await Client.sync({ force: false });
+    logger.info('Client synchronisé');
     logger.info('Database synchronized successfully');
 
-    // Perform initial sync with Firebase
     await Promise.all([
       syncUsers(),
       syncCamions(),
@@ -110,19 +119,23 @@ async function initialize() {
     ]);
     logger.info('Initial Firebase synchronization completed');
 
-    // Start real-time sync
     startRealtimeSync();
     logger.info('Real-time synchronization started');
-  } catch (error: any) {
-    logger.error('Initialization failed:', {
-      error: error.message,
-      stack: error.stack,
-    });
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.error('Initialization failed:', {
+        error: error.message,
+        stack: error.stack,
+      });
+    } else {
+      logger.error('Initialization failed:', {
+        error: String(error),
+      });
+    }
     process.exit(1);
   }
 }
 
-// Start server only after initialization
 initialize()
   .then(() => {
     app.listen(PORT, () => {

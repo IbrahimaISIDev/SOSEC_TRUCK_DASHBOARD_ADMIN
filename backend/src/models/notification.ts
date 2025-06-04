@@ -1,30 +1,63 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
-import Document from './document';
-import Utilisateur from './utilisateur';
+// src/models/notification.ts
+const { DataTypes, Model } = require('sequelize');
+const sequelize = require('../config/db');
+const Utilisateur = require('./utilisateur');
 
-class Notification extends Model {
+class NotificationModel extends Model {
   public id!: string;
-  public documentId!: string;
-  public joursRestants!: number;
-  public lue!: boolean;
   public utilisateurId!: string;
+  public message!: string;
+  public type!: 'permis_expiration' | 'autre';
+  public daysRemaining!: number;
+  public createdAt!: Date;
+  public updatedAt!: Date;
+
+  public static associate(models: any) {
+    NotificationModel.belongsTo(models.Utilisateur, {
+      foreignKey: 'utilisateurId',
+      as: 'utilisateur',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  }
 }
 
-Notification.init(
+NotificationModel.init(
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    joursRestants: {
+    utilisateurId: {
+      type: DataTypes.STRING, // Match Utilisateur.id
+      allowNull: false,
+      references: {
+        model: 'utilisateurs',
+        key: 'id',
+      },
+    },
+    message: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.ENUM('permis_expiration', 'autre'),
+      allowNull: false,
+    },
+    daysRemaining: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    lue: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -34,7 +67,4 @@ Notification.init(
   }
 );
 
-Notification.belongsTo(Document, { foreignKey: 'documentId', as: 'document' });
-Notification.belongsTo(Utilisateur, { foreignKey: 'utilisateurId', as: 'utilisateur' });
-
-export default Notification;
+module.exports = NotificationModel;

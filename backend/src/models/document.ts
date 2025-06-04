@@ -1,13 +1,18 @@
 import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
+const sequelize = require('../config/db');
 import Utilisateur from './utilisateur';
+import Camion from './camion';
+import Client from './client';
+import Depense from './depense';
+const Notification = require('../models/notification');
+
+import Revenu from './revenu';
 
 class Document extends Model {
   public id!: string;
   public nom!: string;
   public type!: string;
   public fichierUrl!: string;
-  // public chauffeurId!: string; // Type remains string in TypeScript for UUID values
   public driverId!: string; // Type remains string in TypeScript for UUID values
   public dateExpiration!: Date;
   public ticketNum!: string;
@@ -19,6 +24,35 @@ class Document extends Model {
   public extraData!: string;
   public syncStatus!: string;
   public time!: string;
+
+  public static associate(models: { 
+    Utilisateur: typeof Utilisateur; 
+    Camion: typeof Camion; 
+    Depense: typeof Depense; 
+    Revenu: typeof Revenu; 
+    Document: typeof Document; 
+    Notification: typeof Notification; 
+    Client: typeof Client; 
+  }) {
+    // Association with Utilisateur (driver)
+    Document.belongsTo(models.Utilisateur, {
+      foreignKey: 'driverId',
+      as: 'driver',
+      onDelete: 'NO ACTION',
+      onUpdate: 'CASCADE',
+    });
+
+    // Optional: Association with Camion (if documents are tied to trucks)
+    Document.belongsTo(models.Camion, {
+      foreignKey: 'truckId',
+      as: 'truck',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    // You can add more associations here if needed
+    // For example, if documents are related to expenses or revenues
+  }
 }
 
 Document.init(
@@ -39,7 +73,7 @@ Document.init(
     fichierUrl: {
       type: DataTypes.STRING,
     },
-    chauffeurId: {
+    driverId: { // Renamed from chauffeurId to match the class property
       type: DataTypes.UUID, // Changed from STRING to UUID
       allowNull: false,
       references: {
@@ -62,7 +96,14 @@ Document.init(
       type: DataTypes.DATE,
     },
     truckId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID, // Changed to UUID for consistency
+      allowNull: true,
+      references: {
+        model: 'camions',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
     },
     product: {
       type: DataTypes.STRING,
@@ -87,7 +128,5 @@ Document.init(
     timestamps: true,
   }
 );
-
-Document.belongsTo(Utilisateur, { foreignKey: 'driverId', as: 'driver' });
 
 export default Document;

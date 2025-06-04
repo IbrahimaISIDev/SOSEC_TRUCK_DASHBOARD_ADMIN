@@ -6,9 +6,7 @@ import CamionsList from '../components/CamionList';
 import CamionForm from '../components/CamionForm';
 import { getAllCamions, updateCamion, createCamion, deleteCamion } from '../api/camionApi';
 import { getAllChauffeurs } from '../api/userApi';
-import type { Camion } from '../types';
-import type { DecodedToken } from '../types';
-import type { Chauffeur } from '../types';
+import type { Camion, Chauffeur, DecodedToken } from '../types';
 
 const Camions = () => {
   const [camions, setCamions] = useState<Camion[]>([]);
@@ -65,7 +63,7 @@ const Camions = () => {
         console.log('Chauffeurs Data:', JSON.stringify(chauffeursData, null, 2));
         setCamions(camionsResponse.camions);
         setTotalCamions(camionsResponse.total);
-        setChauffeurs(chauffeursData.filter(c => c.role === 'driver'));
+        setChauffeurs(chauffeursData.filter((c) => c.role === 'driver'));
         setLoading(false);
       } catch (err: any) {
         console.error('Fetch Error:', err);
@@ -107,7 +105,7 @@ const Camions = () => {
       console.log('Submitting Camion Data:', data);
       if (isEditing && formData.id) {
         const updatedCamion = await updateCamion(formData.id, data);
-        setCamions(camions.map(c => (c.id === updatedCamion.id ? updatedCamion : c)));
+        setCamions(camions.map((c) => (c.id === updatedCamion.id ? updatedCamion : c)));
         setMessage({ text: 'Camion mis à jour avec succès.', severity: 'success' });
       } else {
         const newCamion = await createCamion(data);
@@ -126,7 +124,7 @@ const Camions = () => {
     if (window.confirm('Voulez-vous vraiment supprimer ce camion ?')) {
       try {
         await deleteCamion(id);
-        setCamions(camions.filter(c => c.id !== id));
+        setCamions(camions.filter((c) => c.id !== id));
         setTotalCamions(totalCamions - 1);
         setMessage({ text: 'Camion supprimé avec succès.', severity: 'success' });
       } catch (err: any) {

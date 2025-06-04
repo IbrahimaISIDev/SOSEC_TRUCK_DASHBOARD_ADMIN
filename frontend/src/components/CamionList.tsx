@@ -1,55 +1,17 @@
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Tooltip,
+  Box,
   Chip,
-  styled,
-  TablePagination,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningIcon from '@mui/icons-material/Warning';
-import { useMemo } from 'react';
-import type { Chauffeur } from '../types';
-import type { Camion } from '../types';
-
-// Styles personnalisés pour la table
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-    cursor: 'pointer',
-  },
-  '&:nth-of-type(even)': {
-    backgroundColor: theme.palette.background.default,
-  },
-}));
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  padding: theme.spacing(1.5),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1),
-    fontSize: '0.85rem',
-  },
-}));
-
-// Style pour les tooltips
-const CustomTooltip = styled(({ className, ...props }: any) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  '& .MuiTooltip-tooltip': {
-    backgroundColor: theme.palette.grey[800],
-    color: theme.palette.common.white,
-    fontSize: '0.9rem',
-    padding: theme.spacing(1),
-  },
-}));
+import { DataGrid, type GridColDef, type GridRenderCellParams } from '@mui/x-data-grid';
+import { useMemo, useState } from 'react';
+import type { Chauffeur, Camion } from '../types';
 
 interface CamionsListProps {
   camions: Camion[];
@@ -63,6 +25,20 @@ interface CamionsListProps {
   handleRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const getAssuranceStatus = (expiration?: string) => {
+  if (!expiration) return { label: 'N/A', color: 'default' };
+  const expDate = new Date(expiration);
+  const today = new Date();
+  const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  if (daysLeft <= 0) {
+    return { label: `Expirée (${-daysLeft} jours)`, color: 'error', icon: <WarningIcon fontSize="small" /> };
+  }
+  if (daysLeft <= 30) {
+    return { label: `Expire bientôt (${daysLeft} jours)`, color: 'warning', icon: <WarningIcon fontSize="small" /> };
+  }
+  return { label: expDate.toLocaleDateString('fr-FR'), color: 'success' };
+};
+
 const CamionsList = ({
   camions,
   chauffeurs,
@@ -74,127 +50,147 @@ const CamionsList = ({
   handlePageChange,
   handleRowsPerPageChange,
 }: CamionsListProps) => {
-  // Optimiser getChauffeurName avec useMemo
-  const getChauffeurName = useMemo(() => {
-    const chauffeurMap = new Map(chauffeurs.map(c => [c.id, c.nom]));
-    return (driverId?: string) => {
-      if (!driverId) return 'Non assigné';
-      return chauffeurMap.get(driverId) || 'Non assigné';
-    };
+  const [searchText, setSearchText] = useState('');
+
+  const chauffeurMap = useMemo(() => {
+    return new Map(chauffeurs.map((c) => [c.id, c.nom]));
   }, [chauffeurs]);
 
-  // Vérifier l'état de l'assurance
-  const getAssuranceStatus = (expiration?: string) => {
-    if (!expiration) return { label: 'N/A', color: 'default' };
-    const expDate = new Date(expiration);
-    const today = new Date();
-    const daysLeft = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  const filteredCamions = useMemo(() => {
+    if (!searchText) return camions;
+    const lower = searchText.toLowerCase();
+    return camions.filter(
+      (c) =>
+        c.nom?.toLowerCase().includes(lower) ||
+        c.type?.toLowerCase().includes(lower) ||
+        c.immatriculation?.toLowerCase().includes(lower) ||
+        (c.driverId && chauffeurMap.get(c.driverId)?.toLowerCase().includes(lower))
+    );
+  }, [camions, searchText, chauffeurMap]);
 
-    if (daysLeft <= 0) {
-      return { label: `Expirée (${-daysLeft} jours)`, color: 'error', icon: <WarningIcon fontSize="small" /> };
-    }
-    if (daysLeft <= 30) {
-      return { label: `Expire bientôt (${daysLeft} jours)`, color: 'warning', icon: <WarningIcon fontSize="small" /> };
-    }
-    return { label: expDate.toLocaleDateString('fr-FR'), color: 'success' };
-  };
+  const columns: GridColDef[] = [
+    {
+      field: 'nom',
+      headerName: 'Nom',
+      flex: 1,
+      minWidth: 120,
+    },
+    {
+      field: 'type',
+      headerName: 'Type',
+      flex: 1,
+      minWidth: 120,
+    },
+    {
+      field: 'immatriculation',
+      headerName: 'Immatriculation',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params: GridRenderCellParams) => params.value || 'N/A',
+    },
+    {
+      field: 'driverId',
+      headerName: 'Chauffeur assigné',
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? chauffeurMap.get(params.value) : 'Non assigné',
+      filterable: true,
+    },
+    {
+      field: 'assuranceExpiration',
+      headerName: "Expiration assurance",
+      flex: 1,
+      minWidth: 180,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = getAssuranceStatus(params.value);
+        return (
+          <Chip
+            label={status.label}
+            color={status.color as 'success' | 'warning' | 'error' | 'default'}
+            size="small"
+            icon={status.icon}
+            sx={{ fontWeight: 'medium' }}
+          />
+        );
+      },
+      sortable: true,
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      minWidth: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <>
+          <Tooltip title="Modifier le camion">
+            <IconButton
+              aria-label="Modifier le camion"
+              onClick={() => handleEditCamion(params.row)}
+              sx={{ color: 'primary.main', '&:hover': { color: 'primary.dark' } }}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Supprimer le camion">
+            <IconButton
+              aria-label="Supprimer le camion"
+              onClick={() => handleDeleteCamion(params.row.id)}
+              sx={{ color: 'error.main', '&:hover': { color: 'error.dark' } }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        boxShadow: 3,
-        borderRadius: 2,
-        overflowX: 'auto',
-        maxWidth: '100%',
-      }}
-    >
-      <Table aria-label="Tableau des camions">
-        <TableHead>
-          <TableRow sx={{ backgroundColor: 'primary.light' }}>
-            <StyledTableCell>
-              <strong>Nom</strong>
-            </StyledTableCell>
-            <StyledTableCell>
-              <strong>Type</strong>
-            </StyledTableCell>
-            <StyledTableCell>
-              <strong>Immatriculation</strong>
-            </StyledTableCell>
-            <StyledTableCell>
-              <strong>Chauffeur assigné</strong>
-            </StyledTableCell>
-            <StyledTableCell>
-              <strong>Expiration assurance</strong>
-            </StyledTableCell>
-            <StyledTableCell align="right">
-              <strong>Actions</strong>
-            </StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {camions.length === 0 ? (
-            <TableRow>
-              <StyledTableCell colSpan={6} align="center">
-                Aucun camion disponible.
-              </StyledTableCell>
-            </TableRow>
-          ) : (
-            camions.map((camion) => {
-              const assuranceStatus = getAssuranceStatus(camion.assuranceExpiration);
-              return (
-                <StyledTableRow key={camion.id}>
-                  <StyledTableCell>{camion.nom}</StyledTableCell>
-                  <StyledTableCell>{camion.type}</StyledTableCell>
-                  <StyledTableCell>{camion.immatriculation || 'N/A'}</StyledTableCell>
-                  <StyledTableCell>{getChauffeurName(camion.driverId)}</StyledTableCell>
-                  <StyledTableCell>
-                    <Chip
-                      label={assuranceStatus.label}
-                      color={assuranceStatus.color as 'success' | 'warning' | 'error' | 'default'}
-                      size="small"
-                      icon={assuranceStatus.icon}
-                      sx={{ fontWeight: 'medium' }}
-                    />
-                  </StyledTableCell>
-                  <StyledTableCell align="right">
-                    <CustomTooltip title="Modifier le camion">
-                      <IconButton
-                        aria-label="Modifier le camion"
-                        onClick={() => handleEditCamion(camion)}
-                        sx={{ color: 'primary.main', '&:hover': { color: 'primary.dark' } }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </CustomTooltip>
-                    <CustomTooltip title="Supprimer le camion">
-                      <IconButton
-                        aria-label="Supprimer le camion"
-                        onClick={() => handleDeleteCamion(camion.id)}
-                        sx={{ color: 'error.main', '&:hover': { color: 'error.dark' } }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </CustomTooltip>
-                  </StyledTableCell>
-                </StyledTableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={totalCamions}
-        rowsPerPage={pageSize}
-        page={currentPage}
-        onPageChange={handlePageChange}
-        onRowsPerPageChange={handleRowsPerPageChange}
-        labelRowsPerPage="Camions par page :"
-        labelDisplayedRows={({ from, to, count }) => `${from}–${to} sur ${count}`}
-      />
-    </TableContainer>
+    <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3, p: 3 }}>
+      <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+        Liste des camions
+      </Typography>
+      <Box sx={{ mb: 2 }}>
+        <input
+          type="text"
+          placeholder="Rechercher..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          style={{
+            padding: 8,
+            borderRadius: 8,
+            border: '1px solid #ccc',
+            width: 250,
+            fontSize: 16,
+          }}
+        />
+      </Box>
+      <Box sx={{ height: 500, bgcolor: 'white', borderRadius: 1 }}>
+        <DataGrid
+          rows={filteredCamions}
+          columns={columns}
+          pageSizeOptions={[5, 10, 25]}
+          pagination
+          disableRowSelectionOnClick
+          sx={{
+            '& .MuiDataGrid-cell': {
+              py: 1,
+            },
+            '& .MuiDataGrid-columnHeader': {
+              bgcolor: 'primary.light',
+              color: 'primary.contrastText',
+            },
+            '& .MuiDataGrid-row:hover': {
+              bgcolor: 'grey.100',
+            },
+            border: 0,
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 
