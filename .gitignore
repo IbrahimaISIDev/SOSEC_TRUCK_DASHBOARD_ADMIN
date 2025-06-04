@@ -22,8 +22,10 @@ backend/dist/
 # Environment files
 .env
 .env.*
+# Frontend environment files
 frontend/.env
 frontend/.env.*
+# Backend environment files
 backend/.env
 backend/.env.*
 
