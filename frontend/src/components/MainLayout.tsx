@@ -16,6 +16,10 @@ import Camions from '../pages/Camions';
 import Mileages from '../pages/Mileages';
 import Tickets from '../pages/Tickets';
 import Expenses from '../pages/Expenses';
+import NotificationsPage from '../pages/Notifications';
+import FactureForm from '../pages/FactureForm';
+import Factures from '../pages/Factures';
+
 
 function MainLayout() {
   const { user } = useAuth();
@@ -64,6 +68,9 @@ function MainLayout() {
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/mileages" element={<Mileages />} />
               <Route path="/trucks" element={<Camions />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/factures" element={<Factures />} />
+              <Route path="/factures/nouvelle" element={<FactureForm />} />
               <Route path="/" element={<Login />} />
               <Route
                 path="*"

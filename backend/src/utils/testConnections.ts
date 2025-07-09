@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 const { db } = require('../config/firebase');
 import { getAuth } from 'firebase-admin/auth';
 import Camion from '../models/camion';
+import sequelize from '../test-db';
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
 

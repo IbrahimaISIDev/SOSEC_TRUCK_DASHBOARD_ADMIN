@@ -73,7 +73,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <img
             src="/logo.png"
-            alt="Saraya Tech Logo"
+            alt="L&N LOGISTICS Logo"
             style={{
               width: '140px',
               marginBottom: '20px',
@@ -90,7 +90,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Saraya Tech Portal
+            L&N LOGISTICS
           </Typography>
           <Typography
             variant="body1"

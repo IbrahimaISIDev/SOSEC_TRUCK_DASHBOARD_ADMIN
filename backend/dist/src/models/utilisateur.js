@@ -57,6 +57,14 @@ Utilisateur.init({
         type: sequelize_1.DataTypes.STRING(255),
         allowNull: true,
     },
+    telephone: {
+        type: sequelize_1.DataTypes.STRING(50),
+        allowNull: true,
+    },
+    adresse: {
+        type: sequelize_1.DataTypes.STRING(255),
+        allowNull: true,
+    },
     token: {
         type: sequelize_1.DataTypes.TEXT,
         allowNull: true,
@@ -110,4 +118,12 @@ Utilisateur.init({
         },
     },
 });
+Utilisateur.associate = (models) => {
+    Utilisateur.belongsTo(models.Camion, {
+        foreignKey: 'camionId',
+        as: 'camion',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+    });
+};
 exports.default = Utilisateur;

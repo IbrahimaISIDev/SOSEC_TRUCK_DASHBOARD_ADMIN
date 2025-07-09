@@ -233,3 +233,40 @@
 {"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-04T14:41:40.848Z"}
 {"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-04T14:41:40.854Z"}
 {"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-04T14:41:40.862Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.683Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.689Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.697Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.701Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.706Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T12:21:50.712Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:34:19.088Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:34:20.088Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:34:28.823Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:34:28.825Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:35:43.724Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Notification.findAll is not a function","timestamp":"2025-06-11T12:36:33.434Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T12:40:49.871Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T12:41:36.444Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T12:59:42.637Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T13:02:07.734Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T13:02:07.738Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T13:02:14.685Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T13:02:14.686Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T13:02:59.721Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: Utilisateur is not associated to NotificationModel!","timestamp":"2025-06-11T13:03:17.261Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-11T13:17:19.084Z"}
+{"level":"error","message":"Erreur lors de la création de la notification: notNull Violation: NotificationModel.utilisateurId cannot be null,\nnotNull Violation: NotificationModel.message cannot be null,\nnotNull Violation: NotificationModel.type cannot be null,\nnotNull Violation: NotificationModel.daysRemaining cannot be null","timestamp":"2025-06-11T13:34:34.779Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: column NotificationModel.read does not exist","timestamp":"2025-06-11T13:57:48.615Z"}
+{"level":"error","message":"Erreur lors de la récupération des notifications: column NotificationModel.read does not exist","timestamp":"2025-06-11T13:58:14.105Z"}
+{"level":"error","message":"Erreur lors de la création de l'utilisateur: The email address is already in use by another account., Stack: Error: The email address is already in use by another account.\n    at FirebaseAuthError.fromServerError (/home/dev/Sosec_Truck_Admin_Dashboard_1/backend/node_modules/firebase-admin/lib/utils/error.js:148:16)\n    at /home/dev/Sosec_Truck_Admin_Dashboard_1/backend/node_modules/firebase-admin/lib/auth/auth-api-request.js:1629:49\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async /home/dev/Sosec_Truck_Admin_Dashboard_1/backend/dist/src/controllers/userController.js:36:36\n    at async /home/dev/Sosec_Truck_Admin_Dashboard_1/backend/node_modules/sequelize/lib/sequelize.js:507:18\n    at async exports.createUserHandler (/home/dev/Sosec_Truck_Admin_Dashboard_1/backend/dist/src/controllers/userController.js:32:28)","timestamp":"2025-06-12T12:41:32.028Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-16T12:15:44.600Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-16T12:15:44.610Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-06-16T12:45:15.591Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T12:29:10.705Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T12:29:10.730Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T12:34:17.218Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T12:34:17.230Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T12:34:32.829Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T16:19:48.877Z"}
+{"level":"error","message":"Erreur d'authentification: jwt expired","timestamp":"2025-07-02T16:19:48.889Z"}
+{"0":{"location":"body","msg":"Date de délivrance invalide","path":"permisDelivrance","type":"field","value":null},"1":{"location":"body","msg":"Date d'expiration invalide","path":"permisExpiration","type":"field","value":null},"level":"error","message":"Validation errors:","timestamp":"2025-07-08T15:15:03.809Z"}

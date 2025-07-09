@@ -1,0 +1,49 @@
+Cahier des charges – Génération automatique de facture
+1. Objectif
+Permettre à l’administrateur de générer facilement une facture personnalisée depuis l’application, en remplissant un formulaire.
+Le système met en page automatiquement la facture et permet de l’exporter en PDF.
+
+2. Fonctionnalités attendues
+a. Page de création de facture
+Accessible uniquement aux administrateurs.
+Formulaire de saisie avec :
+Informations client (nom, adresse, téléphone, email)
+Informations facture (numéro, date, conditions de paiement)
+Liste des prestations ou produits (désignation, quantité, prix unitaire, total ligne)
+TVA/applications de taxes éventuelles
+Total HT, TVA, Total TTC
+Commentaires ou notes facultatives
+Informations société (logo, nom, adresse, SIRET, etc.)
+b. Mise en page automatique
+Aperçu de la facture générée (avant export)
+Mise en page professionnelle, claire et lisible
+c. Export PDF
+Bouton pour générer et télécharger la facture au format PDF
+PDF conforme à l’aperçu affiché
+d. Historique des factures
+Liste des factures générées
+Possibilité de re-télécharger une facture PDF déjà créée
+3. Contraintes techniques
+Génération PDF côté front-end (ex : jsPDF, react-pdf) ou back-end (ex : pdfkit)
+Responsive et compatible tous navigateurs modernes
+Sécurité : seuls les admins peuvent créer/voir les factures
+4. Design & Ergonomie
+Formulaire simple et intuitif
+Facture PDF avec logo, couleurs et mentions légales de la société
+Mise en page adaptée pour impression
+5. Livrables
+Page de création de facture avec formulaire dynamique
+Aperçu en temps réel de la facture
+Génération et téléchargement du PDF
+Page d’historique des factures
+6. Évolutions possibles
+Envoi automatique de la facture par email au client
+Ajout de statuts (payée, en attente, etc.)
+Intégration avec la gestion des paiements
+
+
+# Backend dependencies
+npm install cloudinary puppeteer multer @types/multer
+
+# Alternative si tu préfères S3
+# npm install aws-sdk multer @types/multer

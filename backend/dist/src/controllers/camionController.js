@@ -1,4 +1,7 @@
 "use strict";
+// ============================================
+// 1. CORRECTION DU BACKEND - camionController.ts
+// ============================================
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,16 +12,25 @@ const camion_1 = __importDefault(require("../models/camion"));
 const utilisateur_1 = __importDefault(require("../models/utilisateur"));
 const logger_1 = __importDefault(require("../utils/logger"));
 const uuid_1 = require("uuid");
-const sequelize = require('../config/db'); // Fix: Added sequelize import
+const sequelize = require('../config/db');
 const { db } = require('../config/firebase');
 const sequelize_1 = require("sequelize");
 // Validation rules for camion
 exports.camionValidationRules = [
     (0, express_validator_1.body)('nom').notEmpty().withMessage('Le nom est requis'),
     (0, express_validator_1.body)('type').notEmpty().withMessage('Le type est requis'),
-    (0, express_validator_1.body)('immatriculation').optional().isString().withMessage('Immatriculation doit être une chaîne'),
-    (0, express_validator_1.body)('assuranceExpiration').optional().isISO8601().withMessage("La date d'expiration de l'assurance est invalide"),
-    (0, express_validator_1.body)('driverId').optional().isString().withMessage('driverId doit être une chaîne'),
+    (0, express_validator_1.body)('immatriculation')
+        .optional()
+        .isString()
+        .withMessage('Immatriculation doit être une chaîne'),
+    (0, express_validator_1.body)('assuranceExpiration')
+        .optional()
+        .isISO8601()
+        .withMessage("La date d'expiration de l'assurance est invalide"),
+    (0, express_validator_1.body)('driverId')
+        .optional()
+        .isString()
+        .withMessage('driverId doit être une chaîne'),
 ];
 const createCamionHandler = async (req, res) => {
     try {
@@ -26,7 +38,9 @@ const createCamionHandler = async (req, res) => {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             logger_1.default.error('Validation errors:', errors.array());
-            return res.status(400).json({ error: 'Erreur de validation', details: errors.array() });
+            return res
+                .status(400)
+                .json({ error: 'Erreur de validation', details: errors.array() });
         }
         const { immatriculation, assuranceDetails, assuranceExpiration, nom, type, driverId, } = req.body;
         const result = await sequelize.transaction(async (t) => {
@@ -62,7 +76,9 @@ const createCamionHandler = async (req, res) => {
                 nom: nom.trim(),
                 type: type.trim(),
                 assuranceDetails: assuranceDetails || null,
-                assuranceExpiration: assuranceExpiration ? new Date(assuranceExpiration) : null,
+                assuranceExpiration: assuranceExpiration
+                    ? new Date(assuranceExpiration)
+                    : null,
                 driverId: validatedDriverId,
                 syncStatus: 'synced',
                 time: new Date().toISOString(),
@@ -71,8 +87,10 @@ const createCamionHandler = async (req, res) => {
             const camion = await camion_1.default.create(camionData, { transaction: t });
             if (validatedDriverId) {
                 await utilisateur_1.default.update({ camionId: camion.id }, { where: { id: validatedDriverId }, transaction: t });
+                // CORRECTION: Mise à jour Firebase avec le nom du camion
                 await db.ref(`users/${validatedDriverId}`).update({
                     camionId: camion.id,
+                    camionNom: camion.nom, // ✅ Ajout du nom du camion
                     syncStatus: 'synced',
                     time: new Date().toISOString(),
                 });
@@ -97,7 +115,8 @@ const createCamionHandler = async (req, res) => {
     }
     catch (error) {
         logger_1.default.error(`Erreur lors de la création du camion: ${error.message}, Stack: ${error.stack}`);
-        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === 'SequelizeValidationError' ||
+            error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
                 error: 'Erreur de validation',
                 details: error.errors.map((e) => ({
@@ -116,7 +135,9 @@ const updateCamionHandler = async (req, res) => {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             logger_1.default.error('Validation errors:', errors.array());
-            return res.status(400).json({ error: 'Erreur de validation', details: errors.array() });
+            return res
+                .status(400)
+                .json({ error: 'Erreur de validation', details: errors.array() });
         }
         const { camionId } = req.params;
         const { immatriculation, assuranceDetails, assuranceExpiration, nom, type, driverId, } = req.body;
@@ -157,24 +178,39 @@ const updateCamionHandler = async (req, res) => {
                 nom: nom.trim(),
                 type: type.trim(),
                 assuranceDetails: assuranceDetails || null,
-                assuranceExpiration: assuranceExpiration ? new Date(assuranceExpiration) : null,
+                assuranceExpiration: assuranceExpiration
+                    ? new Date(assuranceExpiration)
+                    : null,
                 driverId: validatedDriverId,
                 syncStatus: 'synced',
                 time: new Date().toISOString(),
             };
             logger_1.default.debug(`Final updateData: ${JSON.stringify(updateData, null, 2)}`);
+            // Gérer les changements de chauffeur
             if (camion.driverId && camion.driverId !== validatedDriverId) {
                 await utilisateur_1.default.update({ camionId: null }, { where: { id: camion.driverId }, transaction: t });
+                // CORRECTION: Retirer le nom du camion de l'ancien chauffeur
                 await db.ref(`users/${camion.driverId}`).update({
                     camionId: null,
+                    camionNom: null, // ✅ Suppression du nom du camion
                     syncStatus: 'synced',
                     time: new Date().toISOString(),
                 });
             }
             if (validatedDriverId && validatedDriverId !== camion.driverId) {
                 await utilisateur_1.default.update({ camionId: camion.id }, { where: { id: validatedDriverId }, transaction: t });
+                // CORRECTION: Ajouter le nom du camion au nouveau chauffeur
                 await db.ref(`users/${validatedDriverId}`).update({
                     camionId: camion.id,
+                    camionNom: updateData.nom, // ✅ Ajout du nom du camion
+                    syncStatus: 'synced',
+                    time: new Date().toISOString(),
+                });
+            }
+            // Si le nom du camion a changé, mettre à jour le chauffeur actuel
+            if (camion.driverId && camion.nom !== updateData.nom) {
+                await db.ref(`users/${camion.driverId}`).update({
+                    camionNom: updateData.nom, // ✅ Mise à jour du nom du camion
                     syncStatus: 'synced',
                     time: new Date().toISOString(),
                 });
@@ -199,7 +235,8 @@ const updateCamionHandler = async (req, res) => {
     }
     catch (error) {
         logger_1.default.error(`Erreur lors de la mise à jour du camion: ${error.message}, Stack: ${error.stack}`);
-        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === 'SequelizeValidationError' ||
+            error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
                 error: 'Erreur de validation',
                 details: error.errors.map((e) => ({
@@ -257,8 +294,10 @@ const deleteCamionHandler = async (req, res) => {
             }
             if (camion.driverId) {
                 await utilisateur_1.default.update({ camionId: null }, { where: { id: camion.driverId }, transaction: t });
+                // CORRECTION: Retirer le nom du camion lors de la suppression
                 await db.ref(`users/${camion.driverId}`).update({
-                    camperformerId: null,
+                    camionId: null,
+                    camionNom: null, // ✅ Suppression du nom du camion
                     syncStatus: 'synced',
                     time: new Date().toISOString(),
                 });

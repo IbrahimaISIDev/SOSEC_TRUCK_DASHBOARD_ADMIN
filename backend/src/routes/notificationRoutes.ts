@@ -1,102 +1,135 @@
-import { Router } from 'express';
-import { authenticateToken, authorizeAdmin } from '../middleware/auth';
-const Notification = require('../models/notification');
+// src/routes/notificationRoutes.ts
+import { Router, Request } from 'express';
+import { authenticateToken, authorizeAdminOrDriver } from '../middleware/auth';
+import NotificationModel from '../models/notification';
 import Utilisateur from '../models/utilisateur';
-import { Op } from 'sequelize';
-const { db } = require('../config/firebase');
 import logger from '../utils/logger';
+import { Op } from 'sequelize';
+import { checkExpirations } from '../services/notificationService';
+
+// Extend Express Request interface to include user property
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      role: string;
+      // add other properties if needed
+    }
+    interface Request {
+      user?: User;
+    }
+  }
+}
 
 const router = Router();
 
-// Route existante pour récupérer les notifications
-router.get('/notifications', authenticateToken, authorizeAdmin, async (req, res) => {
+// Get all notifications (admins see all, drivers see only theirs)
+router.get('/notifications', authenticateToken, authorizeAdminOrDriver, async (req, res) => {
   try {
-    const notifications = await Notification.findAll({
-      include: [{ model: Utilisateur, as: 'utilisateur' }],
-      order: [['createdAt', 'DESC']],
-    });
+    const user = req.user; // User attached by authenticateToken middleware
+    let notifications;
+
+    if (user && user.role === 'admin') {
+      // Admins see all notifications
+      notifications = await NotificationModel.findAll({
+        include: [{ model: Utilisateur, as: 'utilisateur' }],
+        order: [['createdAt', 'DESC']],
+      });
+    } else if (user) {
+      // Drivers see only their own notifications
+      notifications = await NotificationModel.findAll({
+        where: { utilisateurId: user.id },
+        include: [{ model: Utilisateur, as: 'utilisateur' }],
+        order: [['createdAt', 'DESC']],
+      });
+    } else {
+      return res.status(401).json({ error: 'Utilisateur non authentifié.' });
+    }
+
     res.status(200).json(notifications);
   } catch (error: any) {
     logger.error(`Erreur lors de la récupération des notifications: ${error.message}`);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erreur lors de la récupération des notifications.' });
   }
 });
 
-// Route temporaire pour déclencher la vérification des expirations
-router.post('/notifications/check-expirations', authenticateToken, authorizeAdmin, async (req, res) => {
+// Create a notification
+router.post('/notifications', authenticateToken, authorizeAdminOrDriver, async (req, res) => {
   try {
-    const NOTIFICATION_THRESHOLDS = [30, 21, 14, 7, 5, 3, 1];
+    const notification = await NotificationModel.create(req.body);
+    res.status(201).json(notification);
+  } catch (error: any) {
+    logger.error(`Erreur lors de la création de la notification: ${error.message}`);
+    res.status(400).json({ error: 'Erreur lors de la création de la notification.' });
+  }
+});
 
-    const getDaysUntilExpiration = (expirationDate: Date): number => {
-      const today = new Date();
-      const diffTime = expirationDate.getTime() - today.getTime();
-      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    };
+// Mark a notification as read
+router.put('/notifications/:id/read', authenticateToken, authorizeAdminOrDriver, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
 
-    const sendNotification = async (utilisateur: Utilisateur, daysRemaining: number) => {
-      const message = `Le permis de conduire de ${utilisateur.nom} expire dans ${daysRemaining} jour(s).`;
-      try {
-        const notification = await Notification.create({
-          utilisateurId: utilisateur.id,
-          message,
-          type: 'permis_expiration',
-          daysRemaining,
-        });
-
-        await db.ref(`notifications/${notification.id}`).set({
-          id: notification.id,
-          utilisateurId: utilisateur.id,
-          message,
-          type: 'permis_expiration',
-          daysRemaining,
-          createdAt: notification.createdAt.toISOString(),
-          updatedAt: notification.updatedAt.toISOString(),
-        });
-
-        logger.info(`Notification envoyée pour ${utilisateur.nom}: ${message}`);
-      } catch (error: any) {
-        logger.error(
-          `Erreur lors de l'envoi de la notification pour ${utilisateur.nom}: ${error.message}`
-        );
-      }
-    };
-
-    logger.info('Vérification manuelle des expirations des permis...');
-    const chauffeurs = await Utilisateur.findAll({
-      where: {
-        role: 'driver',
-        permisExpiration: { [Op.not]: null },
-      },
-    });
-
-    for (const chauffeur of chauffeurs) {
-      if (!chauffeur.permisExpiration) continue;
-      const daysRemaining = getDaysUntilExpiration(chauffeur.permisExpiration);
-
-      if (NOTIFICATION_THRESHOLDS.includes(daysRemaining)) {
-        const existingNotification = await Notification.findOne({
-          where: {
-            utilisateurId: chauffeur.id,
-            daysRemaining,
-            type: 'permis_expiration',
-          },
-        });
-
-        if (!existingNotification) {
-          await sendNotification(chauffeur, daysRemaining);
-          const admins = await Utilisateur.findAll({ where: { role: 'admin' } });
-          for (const admin of admins) {
-            await sendNotification(admin, daysRemaining);
-          }
-        }
-      }
+    if (!user) {
+      return res.status(401).json({ error: 'Utilisateur non authentifié.' });
     }
 
-    logger.info('Vérification manuelle terminée.');
+    // Drivers can only mark their own notifications as read
+    const whereCondition = user.role === 'admin' ? { id } : { id, utilisateurId: user.id };
+
+    const [updatedRows, [notification]] = await NotificationModel.update(
+      { read: true },
+      {
+        where: whereCondition,
+        returning: true,
+      }
+    );
+
+    if (!updatedRows) {
+      return res.status(404).json({ error: 'Notification non trouvée ou accès non autorisé.' });
+    }
+
+    res.json(notification);
+  } catch (error: any) {
+    logger.error(`Erreur lors de la mise à jour de la notification: ${error.message}`);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour de la notification.' });
+  }
+});
+
+// Delete a notification
+router.delete('/notifications/:id', authenticateToken, authorizeAdminOrDriver, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ error: 'Utilisateur non authentifié.' });
+    }
+
+    // Drivers can only delete their own notifications
+    const whereCondition = user.role === 'admin' ? { id } : { id, utilisateurId: user.id };
+
+    const deletedRows = await NotificationModel.destroy({ where: whereCondition });
+
+    if (!deletedRows) {
+      return res.status(404).json({ error: 'Notification non trouvée ou accès non autorisé.' });
+    }
+
+    res.json({ message: 'Notification supprimée.' });
+  } catch (error: any) {
+    logger.error(`Erreur lors de la suppression de la notification: ${error.message}`);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la notification.' });
+  }
+});
+
+// Manual check for license expirations
+router.post('/notifications/check-expirations', authenticateToken, authorizeAdminOrDriver, async (req, res) => {
+  try {
+    await checkExpirations();
     res.status(200).json({ message: 'Vérification des expirations terminée.' });
   } catch (error: any) {
     logger.error(`Erreur lors de la vérification manuelle: ${error.message}`);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erreur lors de la vérification des expirations.' });
   }
 });
 

@@ -33,6 +33,8 @@ export const createUserHandler = [
         permisLieu,
         permisCategorie,
         camionId,
+        telephone,
+        adresse,
       } = req.body;
 
       if (!password) {
@@ -85,6 +87,8 @@ export const createUserHandler = [
             permisLieu,
             permisCategorie,
             camionId: validatedCamionId,
+            telephone,
+            adresse,
             syncStatus: 'synced',
             time: new Date().toISOString(),
           },
@@ -118,6 +122,8 @@ export const createUserHandler = [
           permisLieu: user.permisLieu,
           permisCategorie: user.permisCategorie,
           camionId: user.camionId || null,
+          telephone: user.telephone || null,
+          adresse: user.adresse || null,
           syncStatus: user.syncStatus,
           time: user.time,
           createdAt: user.createdAt.toISOString(),
@@ -223,6 +229,8 @@ export const updateUserHandler = [
         permisLieu,
         permisCategorie,
         camionId,
+        telephone,
+        adresse,
       } = req.body;
 
       const result = await sequelize.transaction(async (t: any) => {

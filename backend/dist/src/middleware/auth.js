@@ -7,7 +7,9 @@ exports.authorizeAdminOrDriver = exports.authorizeDriver = exports.authorizeAdmi
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const utilisateur_1 = __importDefault(require("../models/utilisateur"));
 const logger_1 = __importDefault(require("../utils/logger"));
-const JWT_SECRET = process.env.JWT_SECRET || 'c57f6619b230a8735fa7dd2fb2753d581c3311be1b0daa490fdbada15d6652ce4ba6c239cf9e44c8f5f1675693b25a02ae480e2b37c6946e243994195cf9afaf';
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+})();
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -16,12 +18,11 @@ const authenticateToken = async (req, res, next) => {
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-        const user = await utilisateur_1.default.findOne({ where: { id: decoded.id, token } });
+        const user = await utilisateur_1.default.findByPk(decoded.id); // Simplified, assuming stateless JWT
         if (!user) {
-            return res.status(403).json({ error: 'Token invalide' });
+            return res.status(403).json({ error: 'Utilisateur non trouvé' });
         }
-        // Assigner l'utilisateur complet à req.user
-        req.user = user; // Compatible avec l'interface étendue
+        req.user = user;
         next();
     }
     catch (error) {

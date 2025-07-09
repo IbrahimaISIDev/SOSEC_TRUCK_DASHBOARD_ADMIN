@@ -3,95 +3,109 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// src/routes/notificationRoutes.ts
 const express_1 = require("express");
 const auth_1 = require("../middleware/auth");
-const Notification = require('../models/notification');
+const notification_1 = __importDefault(require("../models/notification"));
 const utilisateur_1 = __importDefault(require("../models/utilisateur"));
-const sequelize_1 = require("sequelize");
-const { db } = require('../config/firebase');
 const logger_1 = __importDefault(require("../utils/logger"));
+const notificationService_1 = require("../services/notificationService");
 const router = (0, express_1.Router)();
-// Route existante pour récupérer les notifications
-router.get('/notifications', auth_1.authenticateToken, auth_1.authorizeAdmin, async (req, res) => {
+// Get all notifications (admins see all, drivers see only theirs)
+router.get('/notifications', auth_1.authenticateToken, auth_1.authorizeAdminOrDriver, async (req, res) => {
     try {
-        const notifications = await Notification.findAll({
-            include: [{ model: utilisateur_1.default, as: 'utilisateur' }],
-            order: [['createdAt', 'DESC']],
-        });
+        const user = req.user; // User attached by authenticateToken middleware
+        let notifications;
+        if (user && user.role === 'admin') {
+            // Admins see all notifications
+            notifications = await notification_1.default.findAll({
+                include: [{ model: utilisateur_1.default, as: 'utilisateur' }],
+                order: [['createdAt', 'DESC']],
+            });
+        }
+        else if (user) {
+            // Drivers see only their own notifications
+            notifications = await notification_1.default.findAll({
+                where: { utilisateurId: user.id },
+                include: [{ model: utilisateur_1.default, as: 'utilisateur' }],
+                order: [['createdAt', 'DESC']],
+            });
+        }
+        else {
+            return res.status(401).json({ error: 'Utilisateur non authentifié.' });
+        }
         res.status(200).json(notifications);
     }
     catch (error) {
         logger_1.default.error(`Erreur lors de la récupération des notifications: ${error.message}`);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Erreur lors de la récupération des notifications.' });
     }
 });
-// Route temporaire pour déclencher la vérification des expirations
-router.post('/notifications/check-expirations', auth_1.authenticateToken, auth_1.authorizeAdmin, async (req, res) => {
+// Create a notification
+router.post('/notifications', auth_1.authenticateToken, auth_1.authorizeAdminOrDriver, async (req, res) => {
     try {
-        const NOTIFICATION_THRESHOLDS = [30, 21, 14, 7, 5, 3, 1];
-        const getDaysUntilExpiration = (expirationDate) => {
-            const today = new Date();
-            const diffTime = expirationDate.getTime() - today.getTime();
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        };
-        const sendNotification = async (utilisateur, daysRemaining) => {
-            const message = `Le permis de conduire de ${utilisateur.nom} expire dans ${daysRemaining} jour(s).`;
-            try {
-                const notification = await Notification.create({
-                    utilisateurId: utilisateur.id,
-                    message,
-                    type: 'permis_expiration',
-                    daysRemaining,
-                });
-                await db.ref(`notifications/${notification.id}`).set({
-                    id: notification.id,
-                    utilisateurId: utilisateur.id,
-                    message,
-                    type: 'permis_expiration',
-                    daysRemaining,
-                    createdAt: notification.createdAt.toISOString(),
-                    updatedAt: notification.updatedAt.toISOString(),
-                });
-                logger_1.default.info(`Notification envoyée pour ${utilisateur.nom}: ${message}`);
-            }
-            catch (error) {
-                logger_1.default.error(`Erreur lors de l'envoi de la notification pour ${utilisateur.nom}: ${error.message}`);
-            }
-        };
-        logger_1.default.info('Vérification manuelle des expirations des permis...');
-        const chauffeurs = await utilisateur_1.default.findAll({
-            where: {
-                role: 'driver',
-                permisExpiration: { [sequelize_1.Op.not]: null },
-            },
-        });
-        for (const chauffeur of chauffeurs) {
-            if (!chauffeur.permisExpiration)
-                continue;
-            const daysRemaining = getDaysUntilExpiration(chauffeur.permisExpiration);
-            if (NOTIFICATION_THRESHOLDS.includes(daysRemaining)) {
-                const existingNotification = await Notification.findOne({
-                    where: {
-                        utilisateurId: chauffeur.id,
-                        daysRemaining,
-                        type: 'permis_expiration',
-                    },
-                });
-                if (!existingNotification) {
-                    await sendNotification(chauffeur, daysRemaining);
-                    const admins = await utilisateur_1.default.findAll({ where: { role: 'admin' } });
-                    for (const admin of admins) {
-                        await sendNotification(admin, daysRemaining);
-                    }
-                }
-            }
+        const notification = await notification_1.default.create(req.body);
+        res.status(201).json(notification);
+    }
+    catch (error) {
+        logger_1.default.error(`Erreur lors de la création de la notification: ${error.message}`);
+        res.status(400).json({ error: 'Erreur lors de la création de la notification.' });
+    }
+});
+// Mark a notification as read
+router.put('/notifications/:id/read', auth_1.authenticateToken, auth_1.authorizeAdminOrDriver, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ error: 'Utilisateur non authentifié.' });
         }
-        logger_1.default.info('Vérification manuelle terminée.');
+        // Drivers can only mark their own notifications as read
+        const whereCondition = user.role === 'admin' ? { id } : { id, utilisateurId: user.id };
+        const [updatedRows, [notification]] = await notification_1.default.update({ read: true }, {
+            where: whereCondition,
+            returning: true,
+        });
+        if (!updatedRows) {
+            return res.status(404).json({ error: 'Notification non trouvée ou accès non autorisé.' });
+        }
+        res.json(notification);
+    }
+    catch (error) {
+        logger_1.default.error(`Erreur lors de la mise à jour de la notification: ${error.message}`);
+        res.status(500).json({ error: 'Erreur lors de la mise à jour de la notification.' });
+    }
+});
+// Delete a notification
+router.delete('/notifications/:id', auth_1.authenticateToken, auth_1.authorizeAdminOrDriver, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ error: 'Utilisateur non authentifié.' });
+        }
+        // Drivers can only delete their own notifications
+        const whereCondition = user.role === 'admin' ? { id } : { id, utilisateurId: user.id };
+        const deletedRows = await notification_1.default.destroy({ where: whereCondition });
+        if (!deletedRows) {
+            return res.status(404).json({ error: 'Notification non trouvée ou accès non autorisé.' });
+        }
+        res.json({ message: 'Notification supprimée.' });
+    }
+    catch (error) {
+        logger_1.default.error(`Erreur lors de la suppression de la notification: ${error.message}`);
+        res.status(500).json({ error: 'Erreur lors de la suppression de la notification.' });
+    }
+});
+// Manual check for license expirations
+router.post('/notifications/check-expirations', auth_1.authenticateToken, auth_1.authorizeAdminOrDriver, async (req, res) => {
+    try {
+        await (0, notificationService_1.checkExpirations)();
         res.status(200).json({ message: 'Vérification des expirations terminée.' });
     }
     catch (error) {
         logger_1.default.error(`Erreur lors de la vérification manuelle: ${error.message}`);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Erreur lors de la vérification des expirations.' });
     }
 });
 exports.default = router;

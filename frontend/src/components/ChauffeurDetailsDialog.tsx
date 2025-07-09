@@ -98,6 +98,14 @@ export default function ChauffeurDetailsDialog({
                       {chauffeur.email}
                     </Typography>
                   </Box>
+                  {/* <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Téléphone
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                      {chauffeur.telephone || 'Non renseigné'}
+                    </Typography>
+                  </Box> */}
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
                       Rôle

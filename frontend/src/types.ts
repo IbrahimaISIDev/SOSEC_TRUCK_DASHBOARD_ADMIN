@@ -27,6 +27,8 @@ export interface Chauffeur {
   permisCategorie?: string;
   camionId?: string;
   camion?: Camion;
+  telephone?: string | null;
+  adresse?: string | null;
 }
 
 // Interface Mileage
@@ -76,6 +78,49 @@ export interface Expense {
   imageUrl?: string;
   syncStatus: string;
   time?: string;
+}
+
+export interface Notification {
+  id: string;
+  utilisateurId: string;
+  message: string;
+  type: string;
+  daysRemaining: number;
+  createdAt: string;
+  read?: boolean;
+  utilisateur?: {
+    nom: string;
+    email: string;
+  };
+}
+
+export interface LigneFacture {
+  designation: string;
+  quantite: number;
+  prixUnitaire: number;
+  totalLigne: number;
+  poids?: string; // Weight, e.g., "75,740 T"
+  destination?: string; // Destination, e.g., "PORT - SENICO"
+}
+
+export interface Facture {
+  id?: string;
+  numero: string;
+  date: string;
+  clientNom: string;
+  clientAdresse: string;
+  clientTelephone?: string;
+  clientEmail?: string;
+  societeNom: string;
+  societeAdresse: string;
+  societeSiret?: string;
+  lignes: LigneFacture[];
+  totalHT: number;
+  tva: number;
+  totalTTC: number;
+  commentaire?: string;
+  statut: string;
+  pdfUrl?: string; // Added to store Cloudinary URL
 }
 
 // Interface DecodedToken

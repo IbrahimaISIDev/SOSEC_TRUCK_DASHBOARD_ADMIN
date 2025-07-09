@@ -12,6 +12,7 @@ const logger_1 = __importDefault(require("../utils/logger"));
 const { db } = require('../config/firebase');
 const auth_1 = require("firebase-admin/auth");
 const camion_1 = __importDefault(require("../models/camion"));
+const test_db_1 = __importDefault(require("../test-db"));
 const JWT_SECRET = process.env.JWT_SECRET || '';
 exports.createUserHandler = [
     ...require('../validations/userValidation').createUserValidationRules,
@@ -32,7 +33,7 @@ exports.createUserHandler = [
                 });
             }
             // Démarrer une transaction
-            const result = await sequelize.transaction(async (t) => {
+            const result = await test_db_1.default.transaction(async (t) => {
                 var _a, _b;
                 // Créer l'utilisateur dans Firebase Authentication
                 const auth = (0, auth_1.getAuth)();
@@ -154,7 +155,7 @@ exports.updateUserHandler = [
             const { userId } = req.params;
             const { nom, email, role, password, permisNumero, permisDelivrance, permisExpiration, permisLieu, permisCategorie, camionId, } = req.body;
             // Démarrer une transaction
-            const result = await sequelize.transaction(async (t) => {
+            const result = await test_db_1.default.transaction(async (t) => {
                 var _a, _b;
                 const user = await utilisateur_1.default.findByPk(userId, { transaction: t });
                 if (!user) {
@@ -257,7 +258,7 @@ const assignCamionToDriver = async (req, res) => {
         const { userId } = req.params;
         const { camionId } = req.body;
         // Démarrer une transaction
-        const result = await sequelize.transaction(async (t) => {
+        const result = await test_db_1.default.transaction(async (t) => {
             const user = await utilisateur_1.default.findByPk(userId, { transaction: t });
             if (!user) {
                 logger_1.default.warn(`Chauffeur non trouvé pour l'ID: ${userId}`);
@@ -335,7 +336,7 @@ const removeCamionFromDriver = async (req, res) => {
     try {
         const { userId } = req.params;
         // Démarrer une transaction
-        const result = await sequelize.transaction(async (t) => {
+        const result = await test_db_1.default.transaction(async (t) => {
             const user = await utilisateur_1.default.findByPk(userId, { transaction: t });
             if (!user) {
                 logger_1.default.warn(`Chauffeur non trouvé pour l'ID: ${userId}`);

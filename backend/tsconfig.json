@@ -10,6 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node"
   },
-  "include": ["src/**/*", "models/**/*", "config/**/*", "migrations/20250527161612-add-message-to-notifications.js"],
+  "include": ["src/**/*", "models/**/*", "config/**/*", "migrations/20250527161612-add-message-to-notifications.js", "migrations/20250611135957-add-read-to-notifications.js"],
   "exclude": ["node_modules", "../.vscode/dist"]
 }

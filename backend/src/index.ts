@@ -1,4 +1,3 @@
-// src/index.ts
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
@@ -8,6 +7,7 @@ import syncRoutes from './routes/syncRoutes';
 import camionRoutes from './routes/camionRoutes';
 import dataRoutes from './routes/dataRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import factureRoutes from './routes/factureRoutes';
 import {
   syncUsers,
   syncCamions,
@@ -23,8 +23,9 @@ import Depense from './models/depense';
 import Revenu from './models/revenu';
 import Document from './models/document';
 import Client from './models/client';
+import Facture from './models/facture';
+import NotificationModel from './models/notification';
 import logger from './utils/logger';
-import { Model, ModelStatic } from 'sequelize';
 
 // Define the type for the models object
 interface Models {
@@ -34,6 +35,8 @@ interface Models {
   Revenu: typeof Revenu;
   Document: typeof Document;
   Client: typeof Client;
+  Facture: typeof Facture;
+  Notification: typeof NotificationModel;
 }
 
 const app = express();
@@ -60,7 +63,8 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Increase payload size limit to 10MB (or adjust as needed)
+app.use(express.json({ limit: '10mb' }));
 
 // Initialize models
 const models: Models = {
@@ -70,11 +74,12 @@ const models: Models = {
   Revenu,
   Document,
   Client,
+  Facture,
+  Notification: NotificationModel,
 };
 
 // Initialize associations
 Object.values(models).forEach((model) => {
-  // Type assertion to allow 'associate' property
   if ((model as any).associate) {
     (model as any).associate(models);
   }
@@ -87,6 +92,7 @@ app.use('/api', syncRoutes);
 app.use('/api', dataRoutes);
 app.use('/api', camionRoutes);
 app.use('/api', notificationRoutes);
+app.use('/api/factures', factureRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
@@ -108,6 +114,10 @@ async function initialize() {
     logger.info('Document synchronisé');
     await Client.sync({ force: false });
     logger.info('Client synchronisé');
+    await Facture.sync({ force: false });
+    logger.info('Facture synchronisé');
+    await NotificationModel.sync({ force: false });
+    logger.info('Notification synchronisé');
     logger.info('Database synchronized successfully');
 
     await Promise.all([
@@ -117,6 +127,7 @@ async function initialize() {
       syncExpenses(),
       syncMileages(),
     ]);
+
     logger.info('Initial Firebase synchronization completed');
 
     startRealtimeSync();

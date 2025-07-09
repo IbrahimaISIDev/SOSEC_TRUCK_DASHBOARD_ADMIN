@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // src/models/notification.ts
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
@@ -20,7 +21,7 @@ NotificationModel.init({
         primaryKey: true,
     },
     utilisateurId: {
-        type: DataTypes.STRING, // Match Utilisateur.id
+        type: DataTypes.STRING,
         allowNull: false,
         references: {
             model: 'utilisateurs',
@@ -49,9 +50,23 @@ NotificationModel.init({
         allowNull: false,
         defaultValue: DataTypes.NOW,
     },
+    read: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 }, {
     sequelize,
     tableName: 'notifications',
     timestamps: true,
 });
-module.exports = NotificationModel;
+NotificationModel.associate = (models) => {
+    NotificationModel.belongsTo(models.Utilisateur, {
+        foreignKey: 'utilisateurId',
+        as: 'utilisateur',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    });
+};
+// module.exports = NotificationModel;
+exports.default = NotificationModel;

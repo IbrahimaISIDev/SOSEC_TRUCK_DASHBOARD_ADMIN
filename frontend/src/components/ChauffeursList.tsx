@@ -54,10 +54,10 @@ export default function ChauffeursList({
   const [openDetails, setOpenDetails] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
-  const [errorMessage, setErrorMessage] = useState<string>(''); // Ajout pour gérer les erreurs
+  const [errorMessage, setErrorMessage] = useState<string>(''); 
 
   const handleOpenForm = (chauffeur?: Chauffeur) => {
-    setErrorMessage(''); // Réinitialise le message d'erreur à l'ouverture du form
+    setErrorMessage(''); 
     if (chauffeur) {
       setFormData({
         ...chauffeur,

@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/index.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
@@ -13,6 +12,7 @@ const syncRoutes_1 = __importDefault(require("./routes/syncRoutes"));
 const camionRoutes_1 = __importDefault(require("./routes/camionRoutes"));
 const dataRoutes_1 = __importDefault(require("./routes/dataRoutes"));
 const notificationRoutes_1 = __importDefault(require("./routes/notificationRoutes"));
+const factureRoutes_1 = __importDefault(require("./routes/factureRoutes"));
 const syncService_1 = require("./services/syncService");
 require("./services/notificationService");
 const utilisateur_1 = __importDefault(require("./models/utilisateur"));
@@ -21,6 +21,8 @@ const depense_1 = __importDefault(require("./models/depense"));
 const revenu_1 = __importDefault(require("./models/revenu"));
 const document_1 = __importDefault(require("./models/document"));
 const client_1 = __importDefault(require("./models/client"));
+const facture_1 = __importDefault(require("./models/facture"));
+const notification_1 = __importDefault(require("./models/notification"));
 const logger_1 = __importDefault(require("./utils/logger"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
@@ -41,7 +43,8 @@ app.use((0, cors_1.default)({
     },
     credentials: true,
 }));
-app.use(express_1.default.json());
+// Increase payload size limit to 10MB (or adjust as needed)
+app.use(express_1.default.json({ limit: '10mb' }));
 // Initialize models
 const models = {
     Utilisateur: utilisateur_1.default,
@@ -50,10 +53,11 @@ const models = {
     Revenu: revenu_1.default,
     Document: document_1.default,
     Client: client_1.default,
+    Facture: facture_1.default,
+    Notification: notification_1.default,
 };
 // Initialize associations
 Object.values(models).forEach((model) => {
-    // Type assertion to allow 'associate' property
     if (model.associate) {
         model.associate(models);
     }
@@ -65,6 +69,7 @@ app.use('/api', syncRoutes_1.default);
 app.use('/api', dataRoutes_1.default);
 app.use('/api', camionRoutes_1.default);
 app.use('/api', notificationRoutes_1.default);
+app.use('/api/factures', factureRoutes_1.default);
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
@@ -83,6 +88,10 @@ async function initialize() {
         logger_1.default.info('Document synchronisé');
         await client_1.default.sync({ force: false });
         logger_1.default.info('Client synchronisé');
+        await facture_1.default.sync({ force: false });
+        logger_1.default.info('Facture synchronisé');
+        await notification_1.default.sync({ force: false });
+        logger_1.default.info('Notification synchronisé');
         logger_1.default.info('Database synchronized successfully');
         await Promise.all([
             (0, syncService_1.syncUsers)(),

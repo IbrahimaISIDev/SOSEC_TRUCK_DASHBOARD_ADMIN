@@ -24,6 +24,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { NAVBAR_HEIGHT } from './NavBar';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'; // Ajoute cette ligne pour l'icône facture
 
 export const SIDEBAR_WIDTH = 240;
 export const SIDEBAR_COLLAPSED_WIDTH = 60;
@@ -39,10 +40,16 @@ export default function SideBar() {
     { label: 'Tableau de bord', path: '/dashboard', icon: <DashboardIcon /> },
     { label: 'Documents', path: '/documents', icon: <DescriptionIcon /> },
     { label: 'Dépenses', path: '/expenses', icon: <AttachMoneyIcon /> },
-    { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
-    { label: 'Chauffeurs', path: '/drivers', icon: <PersonIcon/> },
+    {
+      label: 'Notifications',
+      path: '/notifications',
+      icon: <NotificationsIcon />,
+    },
+    { label: 'Chauffeurs', path: '/drivers', icon: <PersonIcon /> },
     { label: 'Camions', path: '/trucks', icon: <TruckIcon /> },
     { label: 'Tickets', path: '/tickets', icon: <AssessmentIcon /> },
+    { label: 'Factures', path: '/factures', icon: <ReceiptLongIcon /> }, // Ajoute cette ligne pour le menu Factures
+
     { label: 'Rapports', path: '/reports', icon: <AssessmentIcon /> },
     { label: 'Kilométrage', path: '/mileages', icon: <AssessmentIcon /> },
   ];
@@ -58,16 +65,16 @@ export default function SideBar() {
       {isMobile && (
         <IconButton
           onClick={handleToggle}
-          sx={{ 
-            position: 'fixed', 
+          sx={{
+            position: 'fixed',
             top: NAVBAR_HEIGHT + 8,
-            left: 16, 
-            zIndex: theme.zIndex.drawer - 1, 
-            bgcolor: 'primary.main', 
+            left: 16,
+            zIndex: theme.zIndex.drawer - 1,
+            bgcolor: 'primary.main',
             color: 'white',
             '&:hover': {
               bgcolor: 'primary.dark',
-            }
+            },
           }}
         >
           <MenuIcon />
@@ -95,7 +102,14 @@ export default function SideBar() {
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: open ? 'flex-end' : 'center' }}>
+        <Box
+          sx={{
+            p: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: open ? 'flex-end' : 'center',
+          }}
+        >
           <IconButton onClick={handleToggle} sx={{ color: 'white' }}>
             <MenuIcon />
           </IconButton>
@@ -111,7 +125,9 @@ export default function SideBar() {
                 py: 1,
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
               {open && <ListItemText primary={item.label} />}
             </ListItem>
           ))}

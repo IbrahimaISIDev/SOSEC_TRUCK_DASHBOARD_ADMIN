@@ -20,6 +20,8 @@ class Utilisateur extends Model {
   public camionId?: string | null;
   public createdAt!: Date;
   public updatedAt!: Date;
+  public telephone?: string | null;
+  public adresse?: string | null;
 
   public static associate(models: any) {
     Utilisateur.belongsTo(models.Camion, {
@@ -75,6 +77,14 @@ Utilisateur.init(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    telephone: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    adresse: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     token: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -115,13 +125,13 @@ Utilisateur.init(
     tableName: 'utilisateurs',
     timestamps: true,
     hooks: {
-      beforeCreate: async (user: Utilisateur) => {
+      beforeCreate: async (user) => {
         if (user.password) {
           const saltRounds = 10;
           user.password = await hash(user.password, saltRounds);
         }
       },
-      beforeUpdate: async (user: Utilisateur) => {
+      beforeUpdate: async (user) => {
         if (user.changed('password') && user.password) {
           const saltRounds = 10;
           user.password = await hash(user.password, saltRounds);
@@ -130,5 +140,14 @@ Utilisateur.init(
     },
   }
 );
+
+Utilisateur.associate = (models) => {
+  Utilisateur.belongsTo(models.Camion, {
+    foreignKey: 'camionId',
+    as: 'camion',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  });
+};
 
 export default Utilisateur;

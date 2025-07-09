@@ -47,7 +47,7 @@ export default function NavBar() {
       >
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Saraya Tech Portal
+            L&N LOGISTICS
           </Typography>
           {isMobile ? (
             <IconButton color="inherit" onClick={handleDrawerToggle}>

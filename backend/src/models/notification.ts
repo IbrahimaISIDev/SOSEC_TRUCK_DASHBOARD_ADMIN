@@ -30,7 +30,7 @@ NotificationModel.init(
       primaryKey: true,
     },
     utilisateurId: {
-      type: DataTypes.STRING, // Match Utilisateur.id
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: 'utilisateurs',
@@ -59,6 +59,11 @@ NotificationModel.init(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+    read: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
@@ -67,4 +72,14 @@ NotificationModel.init(
   }
 );
 
-module.exports = NotificationModel;
+NotificationModel.associate = (models) => {
+  NotificationModel.belongsTo(models.Utilisateur, {
+    foreignKey: 'utilisateurId',
+    as: 'utilisateur',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+};
+
+// module.exports = NotificationModel;
+export default NotificationModel;

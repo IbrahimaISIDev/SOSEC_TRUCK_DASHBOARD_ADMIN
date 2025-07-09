@@ -16,6 +16,8 @@ import {
   CardContent,
   Divider,
   Chip,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -30,6 +32,8 @@ import LicenseIcon from '@mui/icons-material/Assignment';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import type { TransitionProps } from '@mui/material/transitions';
 import { Slide } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 // Animation for the dialog
 const Transition = forwardRef(function Transition(
@@ -63,6 +67,7 @@ export default function ChauffeurForm({
   handleSubmit,
 }: ChauffeurFormProps) {
   const [localError, setLocalError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     if (!formData.nom) return 'Le nom est requis.';
@@ -174,7 +179,9 @@ export default function ChauffeurForm({
                     Informations générales
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                  >
                     <TextField
                       fullWidth
                       label="Nom"
@@ -204,7 +211,7 @@ export default function ChauffeurForm({
                       fullWidth
                       label="Mot de passe"
                       name="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={formData.password || ''}
                       onChange={handleInputChange}
                       required={!isEditing}
@@ -215,6 +222,42 @@ export default function ChauffeurForm({
                           ? 'Le mot de passe est requis'
                           : ''
                       }
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label={
+                                showPassword
+                                  ? 'Masquer le mot de passe'
+                                  : 'Afficher le mot de passe'
+                              }
+                              onClick={() => setShowPassword((show) => !show)}
+                              edge="end"
+                              size="small"
+                            >
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Téléphone"
+                      name="telephone"
+                      value={formData.telephone || ''}
+                      onChange={handleInputChange}
+                      variant="outlined"
+                      size="small"
+                    />
+                    <TextField
+                      fullWidth
+                      label="Adresse"
+                      name="adresse"
+                      value={formData.adresse || ''}
+                      onChange={handleInputChange}
                       variant="outlined"
                       size="small"
                     />
@@ -322,7 +365,9 @@ export default function ChauffeurForm({
                     Informations de permis
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                  >
                     <TextField
                       fullWidth
                       label="Numéro de permis"

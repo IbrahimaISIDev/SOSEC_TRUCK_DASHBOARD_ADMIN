@@ -25,7 +25,7 @@ exports.createUserHandler = [
             return res.status(400).json({ error: 'Erreur de validation', details: errors.array() });
         }
         try {
-            const { nom, email, role, password, permisNumero, permisDelivrance, permisExpiration, permisLieu, permisCategorie, camionId, } = req.body;
+            const { nom, email, role, password, permisNumero, permisDelivrance, permisExpiration, permisLieu, permisCategorie, camionId, telephone, adresse, } = req.body;
             if (!password) {
                 return res.status(400).json({ error: 'Le mot de passe est requis pour créer un utilisateur.' });
             }
@@ -72,6 +72,8 @@ exports.createUserHandler = [
                     permisLieu,
                     permisCategorie,
                     camionId: validatedCamionId,
+                    telephone,
+                    adresse,
                     syncStatus: 'synced',
                     time: new Date().toISOString(),
                 }, { transaction: t });
@@ -93,6 +95,8 @@ exports.createUserHandler = [
                     permisLieu: user.permisLieu,
                     permisCategorie: user.permisCategorie,
                     camionId: user.camionId || null,
+                    telephone: user.telephone || null,
+                    adresse: user.adresse || null,
                     syncStatus: user.syncStatus,
                     time: user.time,
                     createdAt: user.createdAt.toISOString(),
@@ -186,7 +190,7 @@ exports.updateUserHandler = [
         }
         try {
             const { userId } = req.params;
-            const { nom, email, role, password, permisNumero, permisDelivrance, permisExpiration, permisLieu, permisCategorie, camionId, } = req.body;
+            const { nom, email, role, password, permisNumero, permisDelivrance, permisExpiration, permisLieu, permisCategorie, camionId, telephone, adresse, } = req.body;
             const result = await sequelize.transaction(async (t) => {
                 var _a, _b;
                 const user = await utilisateur_1.default.findByPk(userId, { transaction: t });
