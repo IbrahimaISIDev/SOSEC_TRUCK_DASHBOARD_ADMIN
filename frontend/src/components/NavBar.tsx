@@ -47,7 +47,7 @@ export default function NavBar() {
       >
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            L&N LOGISTICS
+            L&N ENTREPRISE
           </Typography>
           {isMobile ? (
             <IconButton color="inherit" onClick={handleDrawerToggle}>

@@ -72,15 +72,15 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       >
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <img
-            src="/logo.png"
-            alt="L&N LOGISTICS Logo"
+            src="../../public/assets/LN_ENTREPRISE.jpeg"
+            alt="L&N ENTREPRISE Logo"
             style={{
               width: '140px',
               marginBottom: '20px',
               filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))',
             }}
           />
-          <Typography
+          {/* <Typography
             variant="h4"
             sx={{
               fontWeight: 700,
@@ -90,8 +90,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            L&N LOGISTICS
-          </Typography>
+            L&N ENTREPRISE
+          </Typography> */}
           <Typography
             variant="body1"
             color="text.secondary"

@@ -16,8 +16,8 @@ const createInvoiceHTML = (facture: Facture): HTMLDivElement => {
   div.innerHTML = `
     <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
       <div>
-        <img src="/assets/logistics.jpeg" alt="L&N Logistics Logo" style="height: 60px; width: auto; margin-bottom: 8px;" />
-        <h2 style="margin-top: 16px; font-weight: 700; color: #1a3c6d;">L&N LOGISTICS</h2>
+        <img src="/assets/logistics.jpeg" alt="L&N ENTREPRISE Logo" style="height: 60px; width: auto; margin-bottom: 8px;" />
+        <h2 style="margin-top: 16px; font-weight: 700; color: #1a3c6d;">L&N ENTREPRISE</h2>
         <p style="color: #718096; line-height: 1.6;">LOT 37 MERMOZ</p>
         <p style="color: #718096; line-height: 1.6;">Tél: 78 879 98 67 / 77 634 45 68</p>
         <p style="color: #718096; line-height: 1.6;">Email: llogistsn@gmail.com</p>
@@ -76,7 +76,7 @@ const createInvoiceHTML = (facture: Facture): HTMLDivElement => {
       <h3 style="font-weight: 700; color: #2b6cb0; margin-top: 16px;">Total TTC: ${(facture.totalTTC || 0).toFixed(2)} F</h3>
     </div>
     <div style="margin-top: 20px; font-size: 12px; color: #718096; line-height: 1.5;">
-      <p>Tous les chèques doivent être libellés à l'ordre de L&N LOGISTICS / MOHAMED LEE.</p>
+      <p>Tous les chèques doivent être libellés à l'ordre de L&N ENTREPRISE / MOHAMED LEE.</p>
       <p style="margin-top: 8px;">Montant dû dans les 15 jours. Les comptes en retard sont soumis à des frais de 3% par mois.</p>
     </div>
     ${

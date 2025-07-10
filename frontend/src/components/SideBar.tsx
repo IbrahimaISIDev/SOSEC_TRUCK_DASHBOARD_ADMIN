@@ -38,7 +38,6 @@ export default function SideBar() {
 
   const menuItems = [
     { label: 'Tableau de bord', path: '/dashboard', icon: <DashboardIcon /> },
-    { label: 'Documents', path: '/documents', icon: <DescriptionIcon /> },
     { label: 'Dépenses', path: '/expenses', icon: <AttachMoneyIcon /> },
     {
       label: 'Notifications',
@@ -50,7 +49,6 @@ export default function SideBar() {
     { label: 'Tickets', path: '/tickets', icon: <AssessmentIcon /> },
     { label: 'Factures', path: '/factures', icon: <ReceiptLongIcon /> }, // Ajoute cette ligne pour le menu Factures
 
-    { label: 'Rapports', path: '/reports', icon: <AssessmentIcon /> },
     { label: 'Kilométrage', path: '/mileages', icon: <AssessmentIcon /> },
   ];
 

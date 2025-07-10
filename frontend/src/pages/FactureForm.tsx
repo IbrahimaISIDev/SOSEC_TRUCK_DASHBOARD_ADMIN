@@ -644,7 +644,7 @@ export default function FactureForm() {
                   <Box>
                     <img
                       src="/assets/logistics.jpeg"
-                      alt="L&N Logistics Logo"
+                      alt="L&N ENTREPRISE Logo"
                       style={{
                         height: '60px',
                         width: 'auto',
@@ -655,7 +655,7 @@ export default function FactureForm() {
                       variant="h6"
                       sx={{ mt: 2, fontWeight: 700, color: '#1a3c6d' }}
                     >
-                      L&N LOGISTICS
+                      L&N ENTREPRISE
                     </Typography>
                     <Typography
                       variant="body2"

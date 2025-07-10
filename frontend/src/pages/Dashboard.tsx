@@ -217,7 +217,7 @@ export default function Dashboard() {
         !
       </Typography>
       <Typography variant="body1" color="text.secondary" gutterBottom>
-        Aperçu global des opérations de L&N LOGISTICS
+        Aperçu global des opérations de L&N ENTREPRISE
       </Typography>
 
       <Grid container spacing={3}>

@@ -7,8 +7,6 @@ import NavBar from './NavBar';
 import NAVBAR_HEIGHT from './NavBar';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
-import Documents from '../pages/Documents';
-import Report from '../pages/Reports';
 import Financials from '../pages/Financials';
 import Notifications from '../pages/Notifications';
 import Drivers from '../pages/Drivers';
@@ -59,8 +57,6 @@ function MainLayout() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/reports" element={<Report />} />
               <Route path="/financials" element={<Financials />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/drivers" element={<Drivers />} />
